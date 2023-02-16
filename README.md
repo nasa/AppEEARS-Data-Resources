@@ -19,7 +19,8 @@ Welcome to the AppEEARS-Data-Resources repository. This repository provides reso
 
 > Tutorial are stored in `scripts` folder and are listed below:
 
-> + **COG_AppEEARS_S3_Direct_Access.ipynb**: This tutorial demonstrates how to use AppEEARS Cloud Optimized GEOTIFF (COG) outputs using Python
+> + **COG_AppEEARS_S3_Direct_Access.ipynb**: Jupyter Notebook demonstrating how to use AppEEARS Cloud Optimized GEOTIFF (COG) outputs using Python.
+> + **COG_AppEEARS_S3_Direct_Access.html**: HTML export of Jupyter Notebook demonstrating how to use AppEEARS Cloud Optimized GEOTIFF (COG) outputs using Python.
 
 > Defined functions that will be called in the scripts are store in `modules` folder.
 
