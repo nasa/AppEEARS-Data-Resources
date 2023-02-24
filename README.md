@@ -7,6 +7,7 @@ Welcome to the AppEEARS-Data-Resources repository. This repository provides reso
 
 ---
 
+
 ## **Requirements**  
 
 + Earthdata Login Authentication is required to access AppEEARS API and AppEEARS outpurs direcrly from an Amazon AWS bucket. If you do not have an account, create an account [here](https://urs.earthdata.nasa.gov/users/new).
