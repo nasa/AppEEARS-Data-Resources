@@ -23,6 +23,9 @@ Welcome to the AppEEARS-Data-Resources repository. This repository provides reso
 
 > + **COG_AppEEARS_S3_Direct_Access.ipynb**: Jupyter Notebook demonstrating how to use AppEEARS Cloud Optimized GEOTIFF (COG) outputs using Python.
 > + **COG_AppEEARS_S3_Direct_Access.html**: HTML export of Jupyter Notebook demonstrating how to use AppEEARS Cloud Optimized GEOTIFF (COG) outputs using Python.
+> + **Point_Sample_AppEEARS_S3_Direct_Access.ipynb**: Jupyter Notebook demonstrating how to access AppEEARS point sample Comma-Separated Values (CSV) outputs using Python.
+> + **Point_Sample_AppEEARS_S3_Direct_Access.html**: HTML export of Jupyter Notebook demonstrating how to access AppEEARS point sample Comma-Separated Values (CSV) outputs using Python.
+
 
 > Defined functions that will be called in the scripts are store in `modules` folder.
 
