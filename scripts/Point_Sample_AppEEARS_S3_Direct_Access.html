@@ -14600,21 +14600,21 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <h1 id="How-to-work-with-AppEEARS-Point-Sample-CSV-outputs">How to work with AppEEARS Point Sample CSV outputs<a class="anchor-link" href="#How-to-work-with-AppEEARS-Point-Sample-CSV-outputs">&#182;</a></h1><p>This tutorial demonstrates how to access AppEEARS point sample Comma-Separated Values (CSV) outputs direcly from the cloud. NASA's Application for Extracting and Exploring Analysis Ready Samples (<a href="https://appeears.earthdatacloud.nasa.gov/">AρρEEARS</a>) has been migrated to NASA's Earthdata Cloud space located in <strong>AWS us-west 2</strong>. This enables the user working in the cloud instance deployed in <strong>AWS us-west 2</strong> to access outputs direcly in the cloud using S3 link returned in the location header of the response. In this tutorial, we will walk through the process of submitting a point sample and accessing a CSV outputs from AppEEARS.</p>
 <p><strong>Requirements</strong></p>
 <ul>
-<li>Earthdata Login Authentication is required to access AppEEARS API and AppEEARS outpurs direcrly from an Amazon AWS bucket. See <strong>Requirements</strong> section in <strong>README.md</strong>.</li>
+<li>Earthdata Login Authentication is required to access AppEEARS API and AppEEARS outpurs direcrly from an Amazon AWS bucket. See <strong>Requirements</strong> section in <a href="../README.md"><strong>README.md</strong></a>.</li>
 </ul>
 <p><strong>Learning Objectives</strong></p>
 <ul>
-<li>Learn how to access AppEEARS point sample Comma-Separated Values (CSV) outputs direcly from the cloud.</li>
+<li>Learn how to access AppEEARS point sample CSV outputs direcly from the cloud.</li>
 </ul>
 <p><strong>Tutorial Outline</strong></p>
 <ol>
-<li>Setting Up</li>
-<li>Submit a point request in AppEEARS</li>
-<li>Extract the Direct S3 links</li>
-<li>Create a boto3 Refreshable Session</li>
-<li>CSV File In-Region Direct S3 Access</li>
+<li>Setting up</li>
+<li>Submit a point request</li>
+<li>Extract the S3 links to data in S3</li>
+<li>Create a <code>boto3</code> Refreshable Session</li>
+<li>Direct S3 access of CSV output</li>
 <li>Quality Filtering</li>
-<li>Explore the LST Time Series</li>
+<li>Explore the LST time series</li>
 </ol>
 
 </div>
@@ -14627,7 +14627,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="1.-setting-up">1. setting up<a class="anchor-link" href="#1.-setting-up">&#182;</a></h2><p>Import required packages.</p>
+<h2 id="1.-Setting-up">1. Setting up<a class="anchor-link" href="#1.-Setting-up">&#182;</a></h2><p>Import required packages.</p>
 
 </div>
 </div>
@@ -14637,7 +14637,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">requests</span>
@@ -14650,6 +14650,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
 <span class="kn">from</span> <span class="nn">botocore.client</span> <span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../modules/&#39;</span><span class="p">)</span>
@@ -14669,7 +14670,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>In order to successfully run this tutorial, it is required to create a .netrc file in your home directory. The function <code>_validate_netrc</code> defined in <code>aws_session</code> checks if the netrc file with proper format exists in your home directory. If the netrc file does not exist, it will prompt to ask your Earthdata Login username and password and will create a netrc file. Please see the <strong>Prerequisites</strong> section in <code>README.md</code>.</p>
+<p>To successfully run this tutorial, it is required to create a <strong>.netrc</strong> file in your home directory. The function <code>_validate_netrc</code> defined in <code>aws_session</code> checks if a properly formatted netrc file exists in your home directory. If the netrc file does not exist, it will prompt you for your Earthdata Login username and password and will create a netrc file. Please see the <strong>Prerequisites</strong> section in <a href="../README.md"><strong>README.md</strong></a>.</p>
 
 </div>
 </div>
@@ -14679,7 +14680,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># validate if netrc file is present else create one via the user / password prompt for the urs.earthdata.nasa.gov</span>
@@ -14719,7 +14720,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="2.-Submit-a-point-request-in-AppEEARS">2. Submit a point request in AppEEARS<a class="anchor-link" href="#2.-Submit-a-point-request-in-AppEEARS">&#182;</a></h2><p>In this step, we are going to submit a point request. You can also submit this request using <a href="https://appeears.earthdatacloud.nasa.gov/task/point">AppEEARS Graphic User Interface (GUI)</a> and upload the JSON file provided in the repository (AppEEARS-Data-Resources/additional_file/point-request.json). If you have your completed request, save your <code>task_id</code> to a variable, skip this step, and move to the next step of tutorial.</p>
+<h2 id="2.-Submit-a-point-request-in-AppEEARS">2. Submit a point request in AppEEARS<a class="anchor-link" href="#2.-Submit-a-point-request-in-AppEEARS">&#182;</a></h2><p>In this step, we are going to submit a point request. You can also submit this same request to the <a href="https://appeears.earthdatacloud.nasa.gov/task/point">AppEEARS Graphic User Interface (GUI)</a> by uploading the JSON file provided in the repository (AppEEARS-Data-Resources/additional_file/point-request.json). If you have completed the request, save your <code>task_id</code> to a variable, skip this step, and move to the next step of tutorial.</p>
 
 </div>
 </div>
@@ -14741,7 +14742,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">appeears_API_endpoint</span> <span class="o">=</span> <span class="s1">&#39;https://appeears.earthdatacloud.nasa.gov/api/&#39;</span>
@@ -14759,7 +14760,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>To access AppEEARS API a <strong>token</strong> is needed. This token is created using AppEEARS API endpoint, Earthdata Login credential stored in .netrc file, and <code>requests.post</code> function. This generated token will be added to the header. The header will be passed to <code>requests.post</code> function showing you are a qualifid user for submit and access a request.</p>
+<p>A <strong>Bearer Token</strong> is needed to submit requests to the AppEEARS API. To generated a token, a <code>POST</code> request containing Earthdata Login credentials stored in <strong>.netrc file</strong> is submitted to the <a href="https://appeears.earthdatacloud.nasa.gov/api/#authentication"><code>login</code></a> service from the AppEEARS API.</p>
 
 </div>
 </div>
@@ -14769,12 +14770,80 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">urs</span> <span class="o">=</span> <span class="s1">&#39;urs.earthdata.nasa.gov&#39;</span>
-<span class="n">token_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">login&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">appeears_API_endpoint</span><span class="p">),</span> <span class="n">auth</span> <span class="o">=</span> <span class="p">(</span><span class="n">netrc</span><span class="p">()</span><span class="o">.</span><span class="n">authenticators</span><span class="p">(</span><span class="n">urs</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">netrc</span><span class="p">()</span><span class="o">.</span><span class="n">authenticators</span><span class="p">(</span><span class="n">urs</span><span class="p">)[</span><span class="mi">2</span><span class="p">]))</span><span class="o">.</span><span class="n">json</span><span class="p">()</span> <span class="c1"># Insert API URL, call login service, provide credentials &amp; return json </span>
-<span class="n">token</span> <span class="o">=</span> <span class="n">token_response</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">]</span>                      <span class="c1"># Save login token to a variable</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">token_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">login&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">appeears_API_endpoint</span><span class="p">),</span> <span class="n">auth</span> <span class="o">=</span> <span class="p">(</span><span class="n">netrc</span><span class="p">()</span><span class="o">.</span><span class="n">authenticators</span><span class="p">(</span><span class="n">urs</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">netrc</span><span class="p">()</span><span class="o">.</span><span class="n">authenticators</span><span class="p">(</span><span class="n">urs</span><span class="p">)[</span><span class="mi">2</span><span class="p">]))</span><span class="o">.</span><span class="n">json</span><span class="p">()</span> <span class="c1"># Insert API URL, call login service, provide credentials &amp; return json </span>
+<span class="n">token_response</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>{&#39;token_type&#39;: &#39;Bearer&#39;,
+ &#39;token&#39;: &#39;BL2uWT50_qVKOTtcDr2yigaNm-83GN0A1W8lYmiihzSVl2BIoHXnESxNmAMjNWDIGyIwsZusAtcoaxYSpmpl4A&#39;,
+ &#39;expiration&#39;: &#39;2023-03-15T15:13:36Z&#39;}</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>We'll save the <strong>token</strong> to as an <strong>Authorization</strong> object we can pass in the header of any request made to the AppEEARS API.</p>
+
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">token</span> <span class="o">=</span> <span class="n">token_response</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">]</span>                      <span class="c1"># Save login token to a variable</span>
 <span class="n">head</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="s1">&#39;Bearer </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">token</span><span class="p">)}</span>  <span class="c1"># Create a header to store token information, needed to submit a request</span>
 </pre></div>
 
@@ -14790,7 +14859,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Next, compile a JSON object with the request parameters. The coordinates of LP DAAC location is used as an example here. <code>LST_Night_1km</code> and <code>LST_Day_1km</code> layers from <code>MOD11A1</code> version 6.1 are selected below.</p>
+<p>The payload for an AppEEARS API request is a JSON object. Here, we compile the request JSON object with the required parameters. The coordinates (i.e., lat/lon pair) for where the LP DAAC is located are used as our point location. The data layers <code>LST_Night_1km</code> and <code>LST_Day_1km</code> from <code>MOD11A1</code> version 6.1 are selected below.</p>
 
 </div>
 </div>
@@ -14800,17 +14869,19 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">task_name</span> <span class="o">=</span> <span class="s2">&quot;EROS&quot;</span>
-<span class="n">task_type</span> <span class="o">=</span> <span class="s1">&#39;point&#39;</span>                  <span class="c1"># Type of task, area or point</span>
-<span class="n">startDate</span> <span class="o">=</span> <span class="s1">&#39;01-01-2015&#39;</span>            <span class="c1"># Start of the date range for which to extract data: MM-DD-YYYY</span>
-<span class="n">endDate</span> <span class="o">=</span> <span class="s1">&#39;03-01-2023&#39;</span>              <span class="c1"># End of the date range for which to extract data: MM-DD-YYYY</span>
-<span class="c1"># yearRange = [2010, 2023]</span>
+<span class="n">task_type</span> <span class="o">=</span> <span class="s1">&#39;point&#39;</span>             <span class="c1"># Type of task, area or point</span>
+<span class="n">startDate</span> <span class="o">=</span> <span class="s1">&#39;01-01-2015&#39;</span>        <span class="c1"># Start of the date range for which to extract data: MM-DD-YYYY</span>
+<span class="n">endDate</span> <span class="o">=</span> <span class="s1">&#39;03-01-2023&#39;</span>          <span class="c1"># End of the date range for which to extract data: MM-DD-YYYY</span>
 <span class="n">lat</span> <span class="o">=</span>  <span class="p">[</span><span class="mf">43.736038</span><span class="p">]</span>
 <span class="n">lon</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">96.62139</span><span class="p">]</span>
-<span class="n">prodLayer</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;layer&quot;</span><span class="p">:</span> <span class="s2">&quot;LST_Day_1km&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">:</span> <span class="s2">&quot;MOD11A1.061&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;layer&quot;</span><span class="p">:</span> <span class="s2">&quot;LST_Night_1km&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">:</span> <span class="s2">&quot;MOD11A1.061&quot;</span><span class="p">}]</span>
+<span class="n">prodLayer</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;layer&quot;</span><span class="p">:</span> <span class="s2">&quot;LST_Day_1km&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">:</span> <span class="s2">&quot;MOD11A1.061&quot;</span><span class="p">},</span> 
+    <span class="p">{</span><span class="s2">&quot;layer&quot;</span><span class="p">:</span> <span class="s2">&quot;LST_Night_1km&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">:</span> <span class="s2">&quot;MOD11A1.061&quot;</span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 
      </div>
@@ -14823,7 +14894,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">task</span> <span class="o">=</span> <span class="p">{</span>
@@ -14870,7 +14941,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">task_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">task&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">appeears_API_endpoint</span><span class="p">),</span> <span class="n">json</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">head</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>   <span class="c1"># Post json to the API task service, return response as json</span>
@@ -14890,13 +14961,13 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>{&#39;task_id&#39;: &#39;00a9b5cd-eb14-4041-b7ba-3244383f9b7a&#39;, &#39;status&#39;: &#39;pending&#39;}</pre>
+<pre>{&#39;task_id&#39;: &#39;9b2f9a77-da1a-41ac-ba47-baeb577ad99f&#39;, &#39;status&#39;: &#39;pending&#39;}</pre>
 </div>
 
 </div>
@@ -14922,7 +14993,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">task_id</span> <span class="o">=</span> <span class="n">task_response</span><span class="p">[</span><span class="s1">&#39;task_id&#39;</span><span class="p">]</span>
@@ -14942,13 +15013,13 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>&#39;00a9b5cd-eb14-4041-b7ba-3244383f9b7a&#39;</pre>
+<pre>&#39;9b2f9a77-da1a-41ac-ba47-baeb577ad99f&#39;</pre>
 </div>
 
 </div>
@@ -14962,7 +15033,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Ping API until request is complete, then continue to Section 3</span>
@@ -14990,8 +15061,34 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>queued
-queued
-queued
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
+processing
 processing
 processing
 processing
@@ -15041,10 +15138,10 @@ done
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># task_id = &#39;00a9b5cd-eb14-4041-b7ba-3244383f9b7a&#39;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#task_id = &#39;&lt;ADD task_id / request_id from AppEEARS GUI&gt;&#39;</span>
 </pre></div>
 
      </div>
@@ -15070,11 +15167,10 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">bundle</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">bundle/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">appeears_API_endpoint</span><span class="p">,</span><span class="n">task_id</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="n">head</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>  <span class="c1"># Call API and return bundle contents for the task_id as json</span>
-
 <span class="n">bundle</span>
 </pre></div>
 
@@ -15091,45 +15187,45 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[13]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
 <pre>{&#39;files&#39;: [{&#39;sha256&#39;: &#39;2d217eb9d967d849212bf6702a91e3fd615a7188cba72bf58e0b4d9849417865&#39;,
-   &#39;file_id&#39;: &#39;8d69e8f3-869f-4873-8c3e-58452e5d0442&#39;,
+   &#39;file_id&#39;: &#39;959e4c02-6ff1-4370-ba0d-67f5613eb3fa&#39;,
    &#39;file_name&#39;: &#39;EROS-MOD11A1-061-results.csv&#39;,
    &#39;file_size&#39;: 1168238,
    &#39;file_type&#39;: &#39;csv&#39;,
-   &#39;s3_url&#39;: &#39;s3://appeears-output/00a9b5cd-eb14-4041-b7ba-3244383f9b7a/EROS-MOD11A1-061-results.csv&#39;},
+   &#39;s3_url&#39;: &#39;s3://appeears-output/9b2f9a77-da1a-41ac-ba47-baeb577ad99f/EROS-MOD11A1-061-results.csv&#39;},
   {&#39;sha256&#39;: &#39;70dc8abc16c8368f6926f735f5f9057c27338a41f77165e648c600185acdff39&#39;,
-   &#39;file_id&#39;: &#39;1ef1efc5-63da-4988-ad28-271742bfb9a9&#39;,
+   &#39;file_id&#39;: &#39;d198e3ac-93ce-4587-92df-f296c3d6b75b&#39;,
    &#39;file_name&#39;: &#39;EROS-granule-list.txt&#39;,
    &#39;file_size&#39;: 479520,
    &#39;file_type&#39;: &#39;txt&#39;,
-   &#39;s3_url&#39;: &#39;s3://appeears-output/00a9b5cd-eb14-4041-b7ba-3244383f9b7a/EROS-granule-list.txt&#39;},
-  {&#39;sha256&#39;: &#39;5fc5efa5df0e87b536f0a9490813b51595f907671a8f153105c30dbcae508bbc&#39;,
-   &#39;file_id&#39;: &#39;4db54aad-ba09-477a-b0a8-ad208cd0f835&#39;,
+   &#39;s3_url&#39;: &#39;s3://appeears-output/9b2f9a77-da1a-41ac-ba47-baeb577ad99f/EROS-granule-list.txt&#39;},
+  {&#39;sha256&#39;: &#39;dd9359b792376d6939fac09b8be74ad5db8ca74e009aa386325f4d5ff0b1a004&#39;,
+   &#39;file_id&#39;: &#39;7c0280db-6764-4672-a58f-e8cc29229c32&#39;,
    &#39;file_name&#39;: &#39;EROS-request.json&#39;,
    &#39;file_size&#39;: 786,
    &#39;file_type&#39;: &#39;json&#39;,
-   &#39;s3_url&#39;: &#39;s3://appeears-output/00a9b5cd-eb14-4041-b7ba-3244383f9b7a/EROS-request.json&#39;},
-  {&#39;sha256&#39;: &#39;9fe0e2a9d628f8e8bbc9d5467a12449482a3888fe021a417ca6575681b33230b&#39;,
-   &#39;file_id&#39;: &#39;a9f6aafa-9662-488e-8097-6ef24abab2ee&#39;,
+   &#39;s3_url&#39;: &#39;s3://appeears-output/9b2f9a77-da1a-41ac-ba47-baeb577ad99f/EROS-request.json&#39;},
+  {&#39;sha256&#39;: &#39;3795b274a5aaceade145441ca09fe9a73925c64ef32d235923e66112007e142e&#39;,
+   &#39;file_id&#39;: &#39;d1f49518-357a-45b7-b6ee-4b83411f1389&#39;,
    &#39;file_name&#39;: &#39;EROS-MOD11A1-061-metadata.xml&#39;,
-   &#39;file_size&#39;: 16773,
+   &#39;file_size&#39;: 16775,
    &#39;file_type&#39;: &#39;xml&#39;,
-   &#39;s3_url&#39;: &#39;s3://appeears-output/00a9b5cd-eb14-4041-b7ba-3244383f9b7a/EROS-MOD11A1-061-metadata.xml&#39;},
-  {&#39;sha256&#39;: &#39;897de8517d2fa093bae6a1ee830b438dd4ac9145c37c5d65e3fc969673d42756&#39;,
-   &#39;file_id&#39;: &#39;50e6f3c2-12e8-4861-8c27-fc353861e3c7&#39;,
+   &#39;s3_url&#39;: &#39;s3://appeears-output/9b2f9a77-da1a-41ac-ba47-baeb577ad99f/EROS-MOD11A1-061-metadata.xml&#39;},
+  {&#39;sha256&#39;: &#39;551b41b89b0a1130a00a6e35f4d6812f284253fe37f994cefeec18b92ce8967d&#39;,
+   &#39;file_id&#39;: &#39;b926d235-70d0-4b63-aa5a-5abe32a032d4&#39;,
    &#39;file_name&#39;: &#39;README.md&#39;,
-   &#39;file_size&#39;: 18941,
+   &#39;file_size&#39;: 18943,
    &#39;file_type&#39;: &#39;txt&#39;,
-   &#39;s3_url&#39;: &#39;s3://appeears-output/00a9b5cd-eb14-4041-b7ba-3244383f9b7a/README.md&#39;}],
- &#39;created&#39;: &#39;2023-03-07T07:00:53.642631&#39;,
- &#39;task_id&#39;: &#39;00a9b5cd-eb14-4041-b7ba-3244383f9b7a&#39;,
- &#39;updated&#39;: &#39;2023-03-07T07:37:04.836699&#39;,
+   &#39;s3_url&#39;: &#39;s3://appeears-output/9b2f9a77-da1a-41ac-ba47-baeb577ad99f/README.md&#39;}],
+ &#39;created&#39;: &#39;2023-03-13T16:05:31.183063&#39;,
+ &#39;task_id&#39;: &#39;9b2f9a77-da1a-41ac-ba47-baeb577ad99f&#39;,
+ &#39;updated&#39;: &#39;2023-03-13T16:41:31.639875&#39;,
  &#39;bundle_type&#39;: &#39;point&#39;}</pre>
 </div>
 
@@ -15156,7 +15252,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">file</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">bundle</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;file_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">]</span>
@@ -15185,7 +15281,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">region_name</span> <span class="o">=</span> <span class="s1">&#39;us-west-2&#39;</span>
@@ -15237,7 +15333,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">boto3_client</span> <span class="o">=</span> <span class="n">boto3_session</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">max_pool_connections</span><span class="o">=</span><span class="mi">20</span><span class="p">))</span>
@@ -15276,7 +15372,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">bucket_name</span> <span class="o">=</span> <span class="n">csv_urls</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
@@ -15306,7 +15402,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">output_csv</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;Body&#39;</span><span class="p">])</span>
@@ -15326,7 +15422,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[18]:</div>
 
 
 
@@ -15677,7 +15773,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">quality_val</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output_csv</span><span class="p">[</span><span class="s1">&#39;MOD11A1_061_QC_Night_MODLAND_Description&#39;</span><span class="p">])</span>
@@ -15698,7 +15794,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
 
 
 
@@ -15721,7 +15817,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">good_qual_flag</span> <span class="o">=</span> <span class="s1">&#39;LST produced, good quality, not necessary to examine more detailed QA&#39;</span>
@@ -15762,7 +15858,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -15778,7 +15874,7 @@ Each output file can be downloaded using the <code>file_id</code> and AppEEARS A
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
@@ -15852,7 +15948,7 @@ class="
 Voice: +1-866-573-3222<br />
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹<br />
 Website: <a href="https://lpdaac.usgs.gov/">https://lpdaac.usgs.gov/</a><br />
-Date last modified: 03-07-2022</p>
+Date last modified: 03-13-2023</p>
 <p>¹Work performed under USGS contract G15PD00467 for NASA contract NNG14HH33I.</p>
 
 </div>
