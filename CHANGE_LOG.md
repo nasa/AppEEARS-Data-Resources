@@ -9,6 +9,7 @@ _________________________________________________________________________
 > ### Added
 > - CONTRIBUTING.md
 > - CODE_OF_CONDUCT.md
+> - LICENSE.md
 > ### Changed
 > ### Fixed
 
