@@ -34,13 +34,15 @@ Welcome to the AppEEARS-Data-Resources repository. This repository provides reso
 |**COG_AppEEARS_S3_Direct_Access.html** | HTML export of Jupyter Notebook demonstrating how to use AppEEARS Cloud Optimized GEOTIFF (COG) outputs using Python | `Python\tutorials` |
 | **Point_Sample_AppEEARS_S3_Direct_Access.ipynb** | Jupyter Notebook demonstrating how to access AppEEARS point sample Comma-Separated Values (CSV) outputs using Python | `Python\tutorials` |
 | **Point_Sample_AppEEARS_S3_Direct_Access.html** | HTML export of Jupyter Notebook demonstrating how to access AppEEARS point sample Comma-Separated Values (CSV) outputs using Python | `Python\tutorials` |
-| **AppEEARS_API_Area.ipynb:** | Jupyter Notebook demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod an area sample  | `Python\tutorials` |
-| **AppEEARS_API_Area.html:** | HTML demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod an area sample  | `Python\tutorials` |
-| **AppEEARS_API_Point.ipynb:** | Jupyter Notebook demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod a point sample | `Python\tutorials` |
-| **AppEEARS_API_Point.html:** | HTML demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod a point sample | `Python\tutorials` |
-| |  | `R\tutorials` |
-| |  | `R\tutorials` |
-| |  | `R\tutorials` |
+| **AppEEARS_API_Area.ipynb** | Jupyter Notebook demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod an area sample  | `Python\tutorials` |
+| **AppEEARS_API_Area.html** | HTML demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod an area sample  | `Python\tutorials` |
+| **AppEEARS_API_Point.ipynb** | Jupyter Notebook demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod a point sample | `Python\tutorials` |
+| **AppEEARS_API_Point.html** | HTML demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod a point sample | `Python\tutorials` |
+| **AppEEARS_API_Area_R.Rmd** | R Markdown Notebook demonstrating how to use R to connect to the AppEEARS API to submit and downlaod an area sample | `R\tutorials` |
+| **AppEEARS_API_Area_R.html** | HTML demonstrating how to use R to connect to the AppEEARS API to submit and downlaod an area sample | `R\tutorials` |
+| **AppEEARS_API_Point_R.Rmd** | R Markdown Notebook demonstrating how to use R to connect to the AppEEARS API to submit and downlaod a point sample | `R\tutorials` |
+| **AppEEARS_API_Point_R.html** | HTML demonstrating how to use R to connect to the AppEEARS API to submit and downlaod a point sample | `R\tutorials` |
+
 
 ---
 
