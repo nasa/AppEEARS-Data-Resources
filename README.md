@@ -17,10 +17,7 @@ Welcome to the AppEEARS-Data-Resources repository. This repository provides reso
 ---
 
 
-## Repository Contents
-
-> The supporting files for use cases are stored in `Data` folder.  
-
+## Repository Contents  
 
 | Repository Folders | Summary | 
 |----|-----|
@@ -28,7 +25,7 @@ Welcome to the AppEEARS-Data-Resources repository. This repository provides reso
 | **Python** | Python resources including tutorials, how-tos, scripts, Defined modules that will be called from the Python resources, and setup instructions | 
 | **R** |  R resources including tutorials, how-tos, scripts, Defined modules that will be called from the R resources, and setup instructions | 
 
-> Python and R resources stored in this repositories are listed below:  
+#### Python and R resources stored in this repositories are listed below:  
 
 
 | Repository Contents | Summary | Path |
