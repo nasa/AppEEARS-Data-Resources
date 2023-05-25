@@ -1,4 +1,4 @@
 *.ipynb_checkpoints
 *__pycache__*
 *.Rproj.user
-* R_output
+* R_output*
