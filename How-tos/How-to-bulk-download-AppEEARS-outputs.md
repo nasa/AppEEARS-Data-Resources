@@ -11,7 +11,7 @@ Submit your request using AppEEARS website or API. More details on how to submit
 Using the AppEEARS Download Sample page, save the list of files you want to download. If you want all the outputs, select all and then click on “Save Download List”. 
 
 ---
-# step 3:
+# Step 3:
  
 To downlaod the outputs using command line, a Bearer Token is required. To generate this Token in command line, you need to make a call to the AppEEARS login service using the NASA Earthdata Login username and password. Insert your Earthdata Login username and password in the line below instead of **Insert_Your_EDL_Username** and **Insert_Your_EDL_Password**. Then type it in command line and press enter to get a token:
 
@@ -23,7 +23,7 @@ Your token should look like:
 
 ---
 
-# step 4:
+# Step 4:
 
 To download the files:  
  - Copy your token and paste it instead of **Insert_Your_Token** in the line below.
