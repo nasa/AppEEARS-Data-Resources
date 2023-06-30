@@ -3,28 +3,27 @@
 Welcome to the AppEEARS-Data-Resources repository. This repository provides resources and tutorials to help users work with [AppEEARS](https://appeears.earthdatacloud.nasa.gov/) programmatically. This repository also includes notebooks showing how to access and work with AppEEARS outputs directly in the Cloud. 
 
 > Please note that in the interest of open science this repository has been made public but is still under active development. 
-
-
 ---
 
 ## Requirements  
 
 + Earthdata Login Authentication is required to access AppEEARS API and AppEEARS outpurs direcrly from an Amazon AWS bucket. If you do not have an account, create an account [here](https://urs.earthdata.nasa.gov/users/new).
+---
 
 ## Prerequisites/Setup Instructions  
 
 Instructions for setting up a compatible environment for working with AppEEARS API locally or in the cloud are linked to below.
-- [`Python` set up instructions](Python/setup_instructions_python.md)
-- [`R` set up instructions](R/setup_instructions_R.md)
+- [`Python` set up instructions](setup/setup_instructions_python.md)
+- [`R` set up instructions](setup/setup_instructions_R.md)
 
-
+---
 ## Getting Started  
 
 ### Clone or download the [AppEEARS-Data-Resources repository](https://github.com/nasa/AppEEARS-Data-Resources).  
 
 - [Download](https://github.com/nasa/AppEEARS-Data-Resources/archive/refs/heads/main.zip)  
 - To clone the repository, type `git clone https://github.com/nasa/AppEEARS-Data-Resources.git` in the command line.  
-  
+---
 
 ## Repository Contents
 
@@ -34,14 +33,14 @@ Content in this repository is divided into Python and R resources including tuto
 > Python and R resources stored in this repositories are listed below:  
 
 
-| Repository Contents | Summary | Path |
+| Repository Contents | Type | Summary | 
 |----|-----|----|
-| **COG_AppEEARS_S3_Direct_Access.ipynb** | Jupyter Notebook demonstrating how to use AppEEARS Cloud Optimized GEOTIFF (COG) outputs using Python | `Python\tutorials` |
-| **Point_Sample_AppEEARS_S3_Direct_Access.ipynb** | Jupyter Notebook demonstrating how to access AppEEARS point sample Comma-Separated Values (CSV) outputs using Python | `Python\tutorials` |
-| **AppEEARS_API_Area.ipynb** | Jupyter Notebook demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod an area sample  | `Python\tutorials` |
-| **AppEEARS_API_Point.ipynb** | Jupyter Notebook demonstrating how to use Python to connect to the AppEEARS API to submit and downlaod a point sample | `Python\tutorials` |
-| **AppEEARS_API_Area_R.Rmd** | R Markdown demonstrating how to use R to connect to the AppEEARS API to submit and downlaod an area sample | `R\tutorials` |
-| **AppEEARS_API_Point_R.Rmd** | R Markdown demonstrating how to use R to connect to the AppEEARS API to submit and downlaod a point sample | `R\tutorials` |
+| **[COG_AppEEARS_S3_Direct_Access.ipynb](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/Python/tutorials/COG_AppEEARS_S3_Direct_Access.ipynb)** | Jupyter Notebook | Demonstrates how to use AppEEARS Cloud Optimized GEOTIFF (COG) outputs using Python 
+| **[Point_Sample_AppEEARS_S3_Direct_Access.ipynb](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/Python/tutorials/Point_Sample_AppEEARS_S3_Direct_Access.ipynb)** | Jupyter Notebook | Demonstrates how to access AppEEARS point sample Comma-Separated Values (CSV) outputs using Python 
+| **[AppEEARS_API_Area.ipynb](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/Python/tutorials/AppEEARS_API_Area.ipynb)** | Jupyter Notebook | Demonstrates how to use Python to connect to the AppEEARS API to submit and downlaod an area sample  
+| **[AppEEARS_API_Point.ipynb](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/Python/tutorials/AppEEARS_API_Point.ipynb)** | Jupyter Notebook | Demonstrates how to use Python to connect to the AppEEARS API to submit and downlaod a point sample 
+| **[AppEEARS_API_Area_R.Rmd](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/R/tutorials/AppEEARS_API_Area_R.Rmd)** | R Markdown  | Demonstrates how to use R to connect to the AppEEARS API to submit and downlaod an area sample
+| **[AppEEARS_API_Point_R.Rmd](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/R/tutorials/AppEEARS_API_Point_R.Rmd)** | R Markdown | Demonstrates how to use R to connect to the AppEEARS API to submit and downlaod a point sample
 
 ---
 
