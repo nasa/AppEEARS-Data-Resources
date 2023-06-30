@@ -9,7 +9,7 @@ Submit your request using AppEEARS [website](https://appeears.earthdatacloud.nas
 ## Step 2  
 
 Using the AppEEARS Download Sample page, save the list of files you want to download. If you want all the outputs, select all and then click on `Save Download List`.  
-![download list](https://github.com/nasa/AppEEARS-Data-Resources/assets/84464058/fbaac9d9-9210-429d-b77b-16858fface6e)
+![download list](https://github.com/nasa/AppEEARS-Data-Resources/assets/84464058/683fe565-07bf-4c36-b330-91d384052896)
 
 
 ## Step 3  
