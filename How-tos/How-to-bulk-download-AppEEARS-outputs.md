@@ -1,37 +1,42 @@
-## How to bulk download your AppEEARS outputs using wget: 
-This quick tutorial shows how to bult downlaod AppEEARS outputs using a command line. Follow steps below to download your AppEEARS outputs.  
+# How to bulk download your AppEEARS outputs using wget  
 
-# Step 1: 
+This how-to shows how to bulk download [AppEEARS](https://appeears.earthdatacloud.nasa.gov/) outputs using [wget](https://www.gnu.org/software/wget/) from the command line. Follow the steps below to download your AppEEARS outputs.  
 
-Submit your request using AppEEARS website or API. More details on how to submit a point or area sample can be found in [AppEEARS Documentation](https://appeears.earthdatacloud.nasa.gov/help) and [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/). 
+## Step 1  
 
----
-# Step 2:
+Submit your request using AppEEARS [website](https://appeears.earthdatacloud.nasa.gov/) or [API](https://appeears.earthdatacloud.nasa.gov/api/). More details on how to submit a point or area sample can be found in [AppEEARS Documentation](https://appeears.earthdatacloud.nasa.gov/help) and [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/).  
 
-Using the AppEEARS Download Sample page, save the list of files you want to download. If you want all the outputs, select all and then click on “Save Download List”. 
+## Step 2  
 
----
-# Step 3:
- 
-To downlaod the outputs using command line, a Bearer Token is required. To generate this Token in command line, you need to make a call to the AppEEARS login service using the NASA Earthdata Login username and password. Insert your Earthdata Login username and password in the line below instead of **Insert_Your_EDL_Username** and **Insert_Your_EDL_Password**. Then type it in command line and press enter to get a token:
+Using the AppEEARS Download Sample page, save the list of files you want to download. If you want all the outputs, select all and then click on `Save Download List`.  
 
-`wget -q -O - --method POST --user= Insert_Your_EDL_Username --password= Insert_Your_EDL_Password--auth-no-challenge https://appeears.earthdatacloud.nasa.gov/api/login `
+## Step 3  
 
-Your token should look like: 
+To download the outputs using wget from the command line, a `Bearer Token` is required. To generate this Token, you make a request to the AppEEARS [login service](https://appeears.earthdatacloud.nasa.gov/api/#login) from the command line, passing along your NASA Earthdata Login username and password in the request.  
+
+The line below submits a HTTP POST request for a `Bearer Token`. Replace `Insert_Your_EDL_Username` and `Insert_Your_EDL_Password` with your Earthdata Login username and password respectively. Add the line to your command line interface and press enter to get a token:  
+
+```text
+wget -q -O - --method POST --user= Insert_Your_EDL_Username --password= Insert_Your_EDL_Password--auth-no-challenge https://appeears.earthdatacloud.nasa.gov/api/login `
+```
+
+The return should look like:  
 
 `{"token_type": "Bearer", "token": "r0HkNQtYquKjkOZbY-6P8mgjA8....", "expiration": "2023-05-04T14:05:47Z"} `
 
----
+where the value contained in `"token"` is your `Bearer Token` (e.g., r0HkNQtYquKjkOZbY-6P8mgjA8....)
 
-# Step 4:
+## Step 4  
 
 To download the files:  
- - Copy your token and paste it instead of **Insert_Your_Token** in the line below.
- - Insert the full path to the saved downloaded list instead of **Insert_full_Path_to_Your_Download_List** in the line below.
- - Type the modified line in your command line and press enter.
 
-`wget --header "Authorization: Bearer Insert_Your_Token” -i Insert_full_Path_to_Your_Download_List `
+- In the command below, replace `Insert_Your_Token` with your token.  
+- Replace `Input_File_List` with the full path to the saved downloaded list in the line below.
+- Add the modified line in your command line and press enter.  
 
+```text
+wget --header "Authorization: Bearer Insert_Your_Token” -i Input_File_List  
+```  
 
 ---
 
