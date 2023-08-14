@@ -41,6 +41,7 @@ Content in this repository is divided into Python and R resources including tuto
 | **[AppEEARS_API_Point.ipynb](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/Python/tutorials/AppEEARS_API_Point.ipynb)** | Jupyter Notebook | Demonstrates how to use Python to connect to the AppEEARS API to submit and downlaod a point sample 
 | **[AppEEARS_API_Area_R.Rmd](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/R/tutorials/AppEEARS_API_Area_R.Rmd)** | R Markdown  | Demonstrates how to use R to connect to the AppEEARS API to submit and downlaod an area sample
 | **[AppEEARS_API_Point_R.Rmd](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/R/tutorials/AppEEARS_API_Point_R.Rmd)** | R Markdown | Demonstrates how to use R to connect to the AppEEARS API to submit and downlaod a point sample
+| **[AppEEARS_API_Point_R.Rmd](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/guides/How-to-bulk-download-AppEEARS-outputs.md)** | Markdown | Demonstrates how to bulk download AppEEARS outputs using wget from the command line
 
 ---
 
