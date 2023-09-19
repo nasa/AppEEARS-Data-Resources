@@ -19,7 +19,7 @@ To download the outputs using wget from the command line, a `Bearer Token` is re
 The line below submits a HTTP POST request for a `Bearer Token`. Replace `Insert_Your_EDL_Username` and `Insert_Your_EDL_Password` with your Earthdata Login username and password respectively. Add the line to your command line interface and press enter to get a token:  
 
 ```text
-wget -q -O - --method POST --user= Insert_Your_EDL_Username --password= Insert_Your_EDL_Password--auth-no-challenge https://appeears.earthdatacloud.nasa.gov/api/login `
+wget -q -O - --method POST --user=Insert_Your_EDL_Username --password=Insert_Your_EDL_Password--auth-no-challenge https://appeears.earthdatacloud.nasa.gov/api/login
 ```
 
 The return should look like:  
