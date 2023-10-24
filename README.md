@@ -1,4 +1,6 @@
-![image](https://github.com/nasa/AppEEARS-Data-Resources/assets/104585874/d515c26c-9d12-456f-b597-a09568066899)
+![image](https://github.com/nasa/AppEEARS-Data-Resources/assets/104585874/9f61f185-50ba-43c0-b992-aa21d35e2b91)
+
+
 
 # AppEEARS-Data-Resources
 
