@@ -37,7 +37,7 @@ To download the files:
 - Add the modified line in your command line and press enter.  
 
 ```text
-wget --header "Authorization: Bearer Insert_Your_Token” -i Input_File_List  
+wget --header "Authorization: Bearer <Insert_Your_Token>" -i <Input_File_List>  
 ```  
 
 ---
