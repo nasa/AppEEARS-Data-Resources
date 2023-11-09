@@ -2,3 +2,9 @@
 *__pycache__*
 *.Rproj.user
 * R_output*
+*data\R_output*
+*.csv
+*.xml
+*.tif
+*granule-list.txt
+*request.json
