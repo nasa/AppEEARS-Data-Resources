@@ -17,8 +17,8 @@ Welcome to the AppEEARS-Data-Resources repository. This repository provides reso
 ## Prerequisites/Setup Instructions  
 
 Instructions for setting up a compatible environment for working with AppEEARS API locally or in the cloud are linked to below.
-- [`Python` set up instructions]([setup/setup_instructions_python.md](https://github.com/nasa/LPDAAC-Data-Resources/blob/main/setup/setup_instructions_python.md))
-- [`R` set up instructions]([setup/setup_instructions_R.md](https://github.com/nasa/LPDAAC-Data-Resources/blob/main/setup/setup_instructions_r.md))
+- [`Python` set up instructions](https://github.com/nasa/LPDAAC-Data-Resources/blob/main/setup/setup_instructions_python.md)
+- [`R` set up instructions](https://github.com/nasa/LPDAAC-Data-Resources/blob/main/setup/setup_instructions_r.md)
 
 ---
 ## Getting Started  
