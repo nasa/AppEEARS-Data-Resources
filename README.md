@@ -1,3 +1,7 @@
+![image](https://github.com/nasa/AppEEARS-Data-Resources/assets/104585874/9f61f185-50ba-43c0-b992-aa21d35e2b91)
+
+
+
 # AppEEARS-Data-Resources
 
 Welcome to the AppEEARS-Data-Resources repository. This repository provides resources and tutorials to help users work with [AppEEARS](https://appeears.earthdatacloud.nasa.gov/) programmatically. This repository also includes notebooks showing how to access and work with AppEEARS outputs directly in the Cloud. 
