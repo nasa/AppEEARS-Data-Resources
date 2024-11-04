@@ -28,8 +28,6 @@ knitr::opts_knit$set(root.dir = dirname(rprojroot::find_rstudio_root_file()))
 
 The Application for Extracting and Exploring Analysis Ready Samples ([AppEEARS](https://appeears.earthdatacloud.nasa.gov/)) offers a simple and efficient way to access and transform [geospatial data](https://appeears.earthdatacloud.nasa.gov/products) from a variety of federal data archives in an easy-to-use web application interface. AppEEARS enables users to subset geospatial data spatially, temporally, and by band/layer for point and area samples. AppEEARS returns not only the requested data, but also the associated quality values, and offers interactive visualizations with summary statistics in the web interface. The [AppEEARS API](https://appeears.earthdatacloud.nasa.gov/api/) offers users **programmatic access** to all features available in AppEEARS, with the exception of visualizations. The API features are demonstrated in this tutorial.
 
-***
-
 ## Example: Submit a point request with multiple points in U.S. National Parks for extracting vegetation and land surface temperature data  
 
 In this tutorial, Connecting to the AppEEARS API, querying the list of available products, submitting a point sample request, downloading the request, working with the AppEEARS Quality API, and loading the results into R for visualization are covered. AppEEARS point requests allow users to subset their desired data using latitude/longitude geographic coordinate pairs (points) for a time period of interest, and for specific data layers within data products. AppEEARS returns the valid data from the parameters defined within the sample request.
@@ -40,9 +38,7 @@ In this tutorial, Connecting to the AppEEARS API, querying the list of available
     - Combined MODIS Leaf Area Index (LAI)  
         - [MCD15A3H.061](https://doi.org/10.5067/MODIS/MCD15A3H.061), 500m, 4 day: 'Lai_500m'      
     - Terra MODIS Land Surface Temperature    
-        - [MOD11A2.061](https://doi.org/10.5067/MODIS/MOD11A2.061), 1000m, 8 day: 'LST_Day_1km', 'LST_Night_1km'  
-
-***
+        - [MOD11A2.061](https://doi.org/10.5067/MODIS/MOD11A2.061), 1000m, 8 day: 'LST_Day_1km', 'LST_Night_1km'
 
 ## Topics Covered in this tutorial:
 
@@ -67,18 +63,13 @@ In this tutorial, Connecting to the AppEEARS API, querying the list of available
 6. **BONUS: Load Request Output and Visualize**    
     6a. Load CSV     
     6b. Plot Results (Line/Scatter Plots)  
-    
-***
 
 ## Prerequisites and evironment Setup
 
-This tutorial requires R and RStudio, compatible R environment with packages, and a `.netrc` file with your NASA Earthdata Login info. Please view `setup.md` stored in `R` folder for details on prerequisites and evironment Setup.   
+This tutorial requires the following R packages to be installed. The code below will check for the packages and install them if they are not already.
 
-+ Run `earthdata_netrc_setup.R` stored in `R\modules` folder to configure your .netrc file. It will prompt you for you NASA Earthdata account username and password. If you already created .netrc file, you can ignore this step. 
-
-+ Run `AppEEARS_API_install.R` stored in `R\modules` folder to find the missing packages and install them.
 ```{r}
-#packages <- c('rmarkdown','earthdatalogin', 'rstac','imager','lubridate','xts','dygraphs','leaflet','terra')
+# Required packages
 packages <- c('earthdatalogin', 'getPass','httr','jsonlite','ggplot2','dplyr','tidyr','readr','geojsonio','geojsonR', 'sp', 'terra', 'rasterVis', 'RColorBrewer', 'jsonlite')
 
 # Identify missing (not installed) packages
@@ -92,7 +83,7 @@ if(length(new.packages)) install.packages(new.packages, repos='http://cran.rstud
 
 ## 1. Getting Started
 
-## 1a. Load Packages
+### 1a. Load Packages
 
 First, load the R packages necessary to run the tutorial.
 
@@ -100,16 +91,16 @@ First, load the R packages necessary to run the tutorial.
 invisible(lapply(packages, library, character.only = TRUE))
 ```
 
-## 1b. Set Up the Output Directory
+### 1b. Set Up the Output Directory
 
 Set your input directory, and create an output directory for the results.
 
 ```{r, warning=FALSE, message=FALSE}
-outDir <- file.path("Data", "R_Output", fsep="/")
+outDir <- file.path("../Data", "R_Output", fsep="/")
 dir.create(outDir)
 ```
 
-## 1c. [Login]{#login}
+### 1c. [Login]{#login}
 
 Submitting a request requires you to authenticate using your NASA Earthdata Login username and password.
 
@@ -154,8 +145,6 @@ prettify(token_response)
 
 Above, you should see a Bearer token. **This token is required to when interacting with the AppEEARS API.** It will expire approximately 48 hours after being acquired.
 
-***
-
 ## 2. Query Available Products
 
 The product API provides details about all of the products and layers available in AppEEARS. For more information, please see the [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#product).
@@ -172,7 +161,7 @@ all_prods <- toJSON(content(prod_req), auto_unbox = TRUE)
 prettify(all_prods)
 ```
 
-## 2a. Search and Explore Available Products
+### 2a. Search and Explore Available Products
 
 Create a list indexed by product name to make it easier to query a specific product.
 
@@ -225,7 +214,7 @@ desired_products <- c('MCD15A3H.061','MOD11A2.061')
 desired_products
 ```
 
-## 2b. Search and Explore Available Layers 
+### 2b. Search and Explore Available Layers 
 
 This API call will list all of the layers available for a given product. Each product is referenced by its `ProductAndVersion` property which is also referred to as the product_id. First, request the layers for the `MCD15A3H.061` product.
 
@@ -275,22 +264,21 @@ desired_layers <- c("LST_Day_1km", "LST_Night_1km", "Lai_500m")
 layers <- data.frame(product = desired_prods, layer = desired_layers)
 ```
 
-***
-
 ## 3. [Submit a Point Request]{#section3}
 
 The Submit task API call provides a way to submit a new request to be processed. It can accept data via JSON or query string. In the example below, create a JSON object and submit a request. Tasks in AppEEARS correspond to each request associated with your user account. Therefore, each of the calls to this service requires an authentication token (see [Section 1c.](#login)).
 
-## 3a. Compile a JSON Object
+### 3a. Compile a JSON Object
 
-In this section, begin by setting up the information needed for a nested dataframe that will be later converted to a JSON object for submitting an AppEEARS point request.
-For detailed information on required JSON parameters, see the [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#tasks).
+In this section, begin by setting up the information needed for a nested dataframe that will be later converted to a JSON object for submitting an AppEEARS point request. For detailed information on required JSON parameters, see the [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#tasks).
 
 For point requests, beside the date range and desired layers information, the coordinates property must also be inside the task object. Optionally, set `id` and `category` properties to further identify your selected coordinates.
 
 ```{r}
-startDate <- "01-01-2018"       # Start of the date range for  which to extract data: MM-DD-YYYY
-endDate <- "12-31-2018"         # End of the date range for  which to extract data: MM-DD-YYYY
+# Start of the date range for which to extract data: MM-DD-YYYY
+startDate <- "01-01-2018"
+# End of the date range for which to extract data: MM-DD-YYYY
+endDate <- "12-31-2018"
 
 # If you are interested in submitting a request using a recurring time in a year, set the time variables as below:
 # startDate <- '05-01'                 # change start/end date to MM-DD
@@ -338,7 +326,7 @@ task_json <- toJSON(task,auto_unbox = TRUE)
 prettify(task_json)
 ```
 
-## 3b. Submit a Task Request
+### 3b. Submit a Task Request
 Token information is needed to submit a request. Below the login token is assigned to a variable.
 
 ```{r}
@@ -367,7 +355,7 @@ task_response <- prettify(toJSON(content(response), auto_unbox = TRUE))
 task_response
 ```
 
-## 3c. Retrieve Task Status
+### 3c. Retrieve Task Status
 
 This API call will list all of the requests associated with your user account, automatically sorted by date descending with the most recent requests listed first.
 The AppEEARS API contains some helpful formatting resources. Below, limit the API response to 2 entries for the last 2 requests and set pretty to True to format the response as an organized JSON object to make it easier to read. Additional information on AppEEARS API
@@ -425,11 +413,9 @@ while (status != 'done') {
 }
 ```
 
-***
-
 ## 4. Download a Request
 
-## 4a. Explore Files in Request Output 
+### 4a. Explore Files in Request Output 
 
 Before downloading the request output, examine the files contained in the request output.
 
@@ -446,7 +432,7 @@ bundle_response <- toJSON(content(response), auto_unbox = TRUE)
 prettify(bundle_response)
 ```
 
-## 4b. Download Files in a Request (Automation)
+### 4b. Download Files in a Request (Automation)
 
 The bundle API provides information about completed tasks. For any completed task, a bundle can be queried to return the files contained as a part of the task request. Below, call the bundle API and return all of the output files. Next, read the contents of the bundle in JSON format and loop through file_id to automate downloading all of the output files into the output directory. For more information, please see [AppEEARS API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#bundle).
 
@@ -470,8 +456,6 @@ for (id in bundle$file_id){
 }
 ```
 
-***
-
 ## 5. Explore AppEEARS Quality Service
 
 The quality API provides quality details about all of the data products available in AppEEARS. Below are examples of how to query the quality API for listing quality products, layers, and values. The final example ([Section 5c.](#decode)) demonstrates how AppEEARS quality services can be leveraged to decode pertinent quality values for your data. For more information visit [AppEEARS API documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#quality).
@@ -489,7 +473,7 @@ q_response <- toJSON(content(q_req), auto_unbox = TRUE)
 prettify(q_response)
 ```
 
-## 5a. List Quality Layers
+### 5a. List Quality Layers
 
 This API call will list all of the quality layer information for a product. For more information visit [AppEEARS API documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#quality)
 
@@ -507,7 +491,7 @@ MCD15A3H_quality <- toJSON(content(MCD15A3H_req), auto_unbox = TRUE)
 prettify(MCD15A3H_quality)
 ```
 
-## 5b. Show Quality Values
+### 5b. Show Quality Values
 
 This API call will list all of the values for a given quality layer.
 
@@ -525,7 +509,7 @@ quality_response <- toJSON(content(quality_req), auto_unbox = TRUE)
 prettify(quality_response)
 ```
 
-## 5c. [Decode Quality Values]{#decode}
+### 5c. [Decode Quality Values]{#decode}
 
 This API call will decode the bits for a given quality value. 
 
@@ -542,12 +526,11 @@ q_response <- toJSON(response, auto_unbox = TRUE)
 prettify(q_response)
 ```
 
-***
 ## 6. **BONUS**: Load Request Output and Visualize
 
 Here, load the CSV file containing the results from your request using `readr` package, and create some basic visualizations using the `ggplot2` package.
 
-## 6a. Load a CSV
+### 6a. Load a CSV
 
 Use the `readr` package to load the CSV file containing the results from the AppEEARS request.
 
@@ -585,7 +568,7 @@ sprintf("Unit for LST_DAY_1KM is: %s", unit)
 
 ```
 
-## 6b. Plot Results (Line/Scatter Plots)
+### 6b. Plot Results (Line/Scatter Plots)
 
 Next, plot a time series of daytime LST for the selected point in Grand Canyon National Park for 2018. Below, filter the LST data to exclude fill values. 
 
