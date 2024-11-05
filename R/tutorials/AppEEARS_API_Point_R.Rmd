@@ -139,8 +139,8 @@ Following a successful request, extract the content from the response and conver
 # Retrieve the content of the request and convert the response to the JSON object
 token_response <- toJSON(content(login_req), auto_unbox = TRUE)
 
-# Print the prettified response
-prettify(token_response)
+# Print the prettified response if desired by uncommenting the line below
+# prettify(token_response)
 ```
 
 Above, you should see a Bearer token. **This token is required to when interacting with the AppEEARS API.** It will expire approximately 48 hours after being acquired.
@@ -670,9 +670,6 @@ This example can provide a template to use for your own research workflows. Leve
  Voice: +1-866-573-3222   
  Organization: Land Processes Distributed Active Archive Center (LP DAAC)  
  Website: https://lpdaac.usgs.gov/  
- Date last modified: 10-01-2024      
+ Date last modified: 11-05-2024      
  
- ^1^ KBR, Inc., contractor to the U.S. Geological Survey, Earth Resources Observation and Science (EROS) Center,  
- Sioux Falls, South Dakota, USA. Work performed under USGS contract G15PD00467 for LP DAAC^2^.  
- 
- ^2^ LP DAAC Work performed under NASA contract NNG14HH33I.
+ ^1^ Work performed under USGS contract 140G0121D0001 for NASA contract NNG14HH33I.

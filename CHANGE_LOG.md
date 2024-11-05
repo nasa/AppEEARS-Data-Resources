@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 _________________________________________________________________________
+## 2024-11-05
+> ### Updated
+>
+> - Updated the AppEEARS API Point and Area R Tutorials
+> - Removed unnecessary files and the `R_Outputs` directory
+
 ## 2023-09-11
 > ### Updated
 > - Set up instruction

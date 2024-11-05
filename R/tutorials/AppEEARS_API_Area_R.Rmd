@@ -142,8 +142,8 @@ Following a successful request, extract the content from the response and conver
 # Retrieve the content of the request and convert the response to the JSON object
 token_response <- toJSON(content(login_req), auto_unbox = TRUE)
 
-# Print the prettified response
-prettify(token_response)
+# Print the prettified response if desired (this will show the token)
+# prettify(token_response)
 ```
 
 Above, you should see a Bearer token. **This token is required to when interacting with the AppEEARS API.** It will expire approximately 48 hours after being acquired.
@@ -185,7 +185,7 @@ products <- setNames(divided_products, fromJSON(all_prods)$ProductAndVersion)
 sprintf("AppEEARS currently supports %i products.", length(products))
 ```
 
-Next, create a loop to get the product names and descriptions. Below, the 'ProductAndVersion' and 'Description' are printed for all products.
+Next, create a loop to get the product names and descriptions and print them for all products.
 
 ```{r}
 for (p in products){
@@ -193,14 +193,14 @@ for (p in products){
 }
 ```
 
-The `product` service provides many useful details, including if a product is currently available in AppEEARS, a description, and information on the spatial and temporal resolution. Below, the product details are retrieved using 'ProductAndVersion'.
+The `product` service provides details such as availability, descriptions, and spatial resolution and temporal revisit. Retrieve the details from the `ProductAndVersion` element.
 
 ```{r}
 # Convert the MCD15A3H.061 info to JSON object and print the prettified info
 prettify(toJSON(products$"MCD15A3H.061"))
 ```
 
-Also, the products can be searched using their description. Below, search for products containing Leaf Area Index (LAI) in their description and make a list of their ProductAndVersion.
+We can also use string pattern matching to search the description for keywords. Below, search for products containing Leaf Area Index (LAI) in their description and make a list of their `ProductAndVersion`.
 
 ```{r}
 # Create an empty list
@@ -292,7 +292,7 @@ The Submit task API call provides a way to submit a new request to be processed.
 
 ### 3a. Load a Shapefile
 
-In this section, begin by loading a shapefile using the `rgdal` package. The shapefile is publicly available for download from the [NPS website](https://irma.nps.gov/DataStore/Reference/Profile/2224545?lnv=True).
+In this section, begin by loading a shapefile using the `terra` package. The shapefile is publicly available for download from the [NPS website](https://irma.nps.gov/DataStore/Reference/Profile/2224545?lnv=True).
 
 ```{r}
 data_path = 'Data'
@@ -409,7 +409,7 @@ task <- list(task_info, taskName, taskType)
 names(task) <- c("params", "task_name", "task_type") 
 ```
 
-`toJSON` function from `jsonlite` package converts the type of dataframe to a string that can be recognized as a JSON object to be submitted as an area request.
+The `toJSON` function from `jsonlite` package converts the type of dataframe to a string that can be recognized as a JSON object to be submitted as an area request.
 
 ```{r}
 task_json <- jsonlite::toJSON(task, auto_unbox = TRUE, digits = 10)
@@ -687,7 +687,4 @@ This example can provide a template to use for your own research workflows. Leve
  Website: https://lpdaac.usgs.gov/  
  Date last modified: 11-04-2024      
  
- ^1^ KBR, Inc., contractor to the U.S. Geological Survey, Earth Resources Observation and Science (EROS) Center,  
- Sioux Falls, South Dakota, USA. Work performed under USGS contract G15PD00467 for LP DAAC^2^.  
- 
- ^2^ LP DAAC Work performed under NASA contract NNG14HH33I.
+ ^1^ Work performed under USGS contract 140G0121D0001 for NASA contract NNG14HH33I.
