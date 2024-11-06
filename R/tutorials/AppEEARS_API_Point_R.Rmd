@@ -18,26 +18,30 @@ theme: lumen
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
+knitr::opts_knit$set(root.dir = dirname(rprojroot::find_rstudio_root_file()))
 ```
+
 ***
 
 **This tutorial demonstrates how to use R to connect to the AppEEARS API**
+
 The Application for Extracting and Exploring Analysis Ready Samples ([AppEEARS](https://appeears.earthdatacloud.nasa.gov/)) offers a simple and efficient way to access and transform [geospatial data](https://appeears.earthdatacloud.nasa.gov/products) from a variety of federal data archives in an easy-to-use web application interface. AppEEARS enables users to subset geospatial data spatially, temporally, and by band/layer for point and area samples. AppEEARS returns not only the requested data, but also the associated quality values, and offers interactive visualizations with summary statistics in the web interface. The [AppEEARS API](https://appeears.earthdatacloud.nasa.gov/api/) offers users **programmatic access** to all features available in AppEEARS, with the exception of visualizations. The API features are demonstrated in this tutorial.
 
-***
-### Example: Submit a point request with multiple points in U.S. National Parks for extracting vegetation and land surface temperature data    
+## Example: Submit a point request with multiple points in U.S. National Parks for extracting vegetation and land surface temperature data  
+
 In this tutorial, Connecting to the AppEEARS API, querying the list of available products, submitting a point sample request, downloading the request, working with the AppEEARS Quality API, and loading the results into R for visualization are covered. AppEEARS point requests allow users to subset their desired data using latitude/longitude geographic coordinate pairs (points) for a time period of interest, and for specific data layers within data products. AppEEARS returns the valid data from the parameters defined within the sample request.
 
-#### Data Used in the Example:
+### Data Used in the Example:
+
 - Data layers: 
     - Combined MODIS Leaf Area Index (LAI)  
-        - [MCD15A3H.006](https://doi.org/10.5067/MODIS/MCD15A3H.006), 500m, 4 day: 'Lai_500m'      
+        - [MCD15A3H.061](https://doi.org/10.5067/MODIS/MCD15A3H.061), 500m, 4 day: 'Lai_500m'      
     - Terra MODIS Land Surface Temperature    
-        - [MOD11A2.061](https://doi.org/10.5067/MODIS/MOD11A2.061), 1000m, 8 day: 'LST_Day_1km', 'LST_Night_1km'  
+        - [MOD11A2.061](https://doi.org/10.5067/MODIS/MOD11A2.061), 1000m, 8 day: 'LST_Day_1km', 'LST_Night_1km'
 
-***
-### Topics Covered in this tutorial:
+## Topics Covered in this tutorial:
+
 1. **Getting Started**  
     1a. Load Packages
     1b. Set Up the Output Directory  
@@ -59,172 +63,222 @@ In this tutorial, Connecting to the AppEEARS API, querying the list of available
 6. **BONUS: Load Request Output and Visualize**    
     6a. Load CSV     
     6b. Plot Results (Line/Scatter Plots)  
-    
-***
-### Prerequisites and evironment Setup
 
-This tutorial requires R and RStudio, compatible R environment with packages, and a `.netrc` file with your NASA Earthdata Login info. Please view `setup.md` stored in `R` folder for details on prerequisites and evironment Setup.   
+## Prerequisites and evironment Setup
 
-+ Run `earthdata_netrc_setup.R` stored in `R\modules` folder to configure your .netrc file. It will prompt you for you NASA Earthdata account username and password. If you already created .netrc file, you can ignore this step. 
+This tutorial requires the following R packages to be installed. The code below will check for the packages and install them if they are not already.
 
-```{r, warning = FALSE, message = FALSE, results= "hide"}
-source(paste(gsub('tutorials','modules',getwd()), 'earthdata_netrc_setup.R', sep='/'))
+```{r}
+# Required packages
+packages <- c('earthdatalogin', 'getPass','httr','jsonlite','ggplot2','dplyr','tidyr','readr','geojsonio','geojsonR', 'sp', 'terra', 'rasterVis', 'RColorBrewer', 'jsonlite')
 
-```
+# Identify missing (not installed) packages
+new.packages = packages[!(packages %in% installed.packages()[, "Package"])]
 
-+ Run `AppEEARS_API_install.R` stored in `R\modules` folder to find the missing packages and install them.
-```{R}
-source(paste(gsub('tutorials','modules',getwd()), 'AppEEARS_API_Install.R', sep='/'))
+# Install new (not installed) packages
+if(length(new.packages)) install.packages(new.packages, repos='http://cran.rstudio.com/', dependencies = TRUE) else print('All required packages are installed.')
 ```
 
 ***
-## 1. **Getting Started**        
-## 1a. Load Packages
-First, load the R packages necessary to run the tutorial. 
+
+## 1. Getting Started
+
+### 1a. Load Packages
+
+First, load the R packages necessary to run the tutorial.
+
 ```{r, warning=FALSE, message=FALSE}
-# Load necessary packages into R                                               
-library(getPass)            # A micro-package for reading passwords
-library(httr)               # To send a request to the server/receive a response from the server
-library(jsonlite)           # Implements a bidirectional mapping between JSON data and the most important R data types
-library(ggplot2)            # Functions for graphing and mapping
-library(tidyr)              # Function for working with tabular data
-library(dplyr)              # Function for working with tabular data
-library(readr)              # Read rectangular data like CSV
+invisible(lapply(packages, library, character.only = TRUE))
 ```
-***
-## 1b. Set Up the Output Directory
+
+### 1b. Set Up the Output Directory
+
 Set your input directory, and create an output directory for the results.
+
+```{r, warning=FALSE, message=FALSE}
+outDir <- file.path("../Data", "R_Output", fsep="/")
+dir.create(outDir)
+```
+
+### 1c. [Login]{#login}
+
+Submitting a request requires you to authenticate using your NASA Earthdata Login username and password.
+
+Start by assigning the AppEEARS API URL to a static variable. 
+
 ```{r}
-outDir <- paste(gsub('R/tutorials','Data',getwd()), 'R_output', sep='/')                # Create an output directory if it doesn't exist
-suppressWarnings(dir.create(outDir))                 
+API_URL = 'https://appeears.earthdatacloud.nasa.gov/api/'
 ```
 
-***
-## 1c. [Login]{#login}
-Submitting a request, requires you to authenticate using your NASA Earthdata Login account. In the prerequisite section of this tutorial, a proper netrc file 
-has been set up by calling `earthdata_netrc_setup.R` script.
+Use the `httr` package to submit an HTTP POST request to login using the username and password. A successful login will provide you with a token to be used later in this tutorial to submit a request. For more information or if you are experiencing difficulties, please see the [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#login).
 
-```{r, echo = FALSE, results='hide'}
-cat('The netrc file can be found in:', Sys.getenv('HOME'))
-```
-Next, assign the AppEEARS API URL to a static variable. 
 ```{r}
-API_URL = 'https://appeears.earthdatacloud.nasa.gov/api/'     # Set the AppEEARS API to a variable
+secret <- jsonlite::base64_enc(paste(
+  getPass::getPass(msg = "Enter your NASA Earthdata Login Username:"),
+  getPass::getPass(msg = "Enter your NASA Earthdata Login Password:"),
+  sep = ":"))
 ```
-Use the `httr` package to post your login request using the username and password stored in Netrc file. A successful login will provide you with a token to be used later in this tutorial to submit a request. For more information or if you are experiencing difficulties, please see the [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#login).
+
+ Submit a POST request to the AppEEARS API's `login` service.
+
 ```{r}
+login_req <- httr::POST(
+  paste0(API_URL,"login"),
+  httr:: add_headers(
+    "Authorization" = paste("Basic", gsub("\n", "", secret)),
+    "Content-Type" = "application/x-www-form-urlencoded;charset=UTF-8"),
+  body = "grant_type=client_credentials")
 
-secret <- jsonlite::base64_enc(gsub(' ', '', paste(gsub('login ', '', readLines(file.path(Sys.getenv('HOME'), ".netrc", fsep = .Platform$file.sep))[2])
-                                     , gsub('password ', '', readLines(file.path(Sys.getenv('HOME'), ".netrc", fsep = .Platform$file.sep))[3])
-                                     , sep = ":")))# Encode the string of username and password
+httr::status_code(login_req)
+```
+A successful request will return `200` as the status.
 
-# Insert API URL, call login service, set the component of HTTP header, and post the request to the server
-response <- httr::POST(paste0(API_URL,"login"), add_headers("Authorization" = paste("Basic", gsub("\n", "", secret)),
-                                                 "Content-Type" =
-                                                   "application/x-www-form-urlencoded;charset=UTF-8"), 
-                 body = "grant_type=client_credentials")
+Following a successful request, extract the content from the response and convern it to a JSON object to explore.
 
-response_content <- content(response)                          # Retrieve the content of the request
-token_response <- toJSON(response_content, auto_unbox = TRUE)  # Convert the response to the JSON object
-remove(secret, response)                       # Remove the variables that are not needed anymore 
-prettify(token_response)                                       # Print the prettified response
+```{r}
+# Retrieve the content of the request and convert the response to the JSON object
+token_response <- toJSON(content(login_req), auto_unbox = TRUE)
+
+# Print the prettified response if desired by uncommenting the line below
+# prettify(token_response)
 ```
 
-**Above, you should see a Bearer token. Notice that this token will expire approximately 48 hours after being acquired.**
+Above, you should see a Bearer token. **This token is required to when interacting with the AppEEARS API.** It will expire approximately 48 hours after being acquired.
 
-***
-## 2. **Query Available Products**
+## 2. Query Available Products
+
 The product API provides details about all of the products and layers available in AppEEARS. For more information, please see the [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#product).
 
-Below, call the product API to list all of the products available in AppEEARS.
+Below, make a request to the `product` service to list all of the products available in AppEEARS.
+
 ```{r}
-prods_req <- GET(paste0(API_URL, "product"))             # Request the info of all products from product service
-prods_content <- content(prods_req)                      # Retrieve the content of request 
-all_Prods <- toJSON(prods_content, auto_unbox = TRUE)    # Convert the info to JSON object
-remove(prods_req, prods_content)                         # Remove the variables that are not needed anymore
-# prettify(all_Prods)                                      # Print the prettified product response
-```
-***
-## 2a. Search and Explore Available Products
-Create a list indexed by product name to make it easier to query a specific product.
-```{r}
-# Divides information from each product.
-divided_products <- split(fromJSON(all_Prods), seq(nrow(fromJSON(all_Prods))))
-# Create a list indexed by the product name and version
-products <- setNames(divided_products,fromJSON(all_Prods)$ProductAndVersion)
-# Print no. products available in AppEEARS
-sprintf("AppEEARS currently supports %i products." ,length(products))   
-```
-Next, look at the product's names and descriptions. Below, the 'ProductAndVersion' and 'Description' are printed for all products.
-```{r}
-# Loop through the products in the list and print the product name and description
-for (p in products){                                   
-  print(paste0(p$ProductAndVersion," is ",p$Description," from ",p$Source))  
-}
-```
-The product service provides many useful details, including if a product is currently available in AppEEARS, a description, and information on the spatial and temporal resolution. Below, the product details are retrieved using 'ProductAndVersion'. 
-```{r}
-# Convert the MCD15A3H.006 info to JSON object and print the prettified info
-prettify(toJSON(products$"MCD15A3H.006")) 
+prod_req <- GET(paste0(API_URL, "product"))
+
+# Retrieve the content of request and convert the info to JSON object
+all_prods <- toJSON(content(prod_req), auto_unbox = TRUE)
+
+# Print the prettified product response
+prettify(all_prods)
 ```
 
-Also, the products can be searched using their description. Below, search for products containing Leaf Area Index in their description and make a list of their productAndVersion.
+### 2a. Search and Explore Available Products
+
+Create a list indexed by product name to make it easier to query a specific product.
+
 ```{r}
-LAI_Products <- list()                                        # Create an empty list 
-for (p in products){                                          # Loop through the product list
-  if (grepl('Leaf Area Index', p$Description )){              # Look through the product description for a keyword 
-    LAI_Products <- append(LAI_Products, p$ProductAndVersion) # Append the LAI products to the list
+# Divides information from each product.
+divided_products <- split(fromJSON(all_prods), seq(nrow(fromJSON(all_prods))))
+
+# Create a list indexed by the product name and version
+products <- setNames(divided_products, fromJSON(all_prods)$ProductAndVersion)
+
+# Print no. products available in AppEEARS
+sprintf("AppEEARS currently supports %i products.", length(products))
+```
+
+Next, create a loop to get the product names and descriptions. Below, the 'ProductAndVersion' and 'Description' are printed for all products.
+
+```{r}
+for (p in products){
+  print(paste0(p$ProductAndVersion, " is ", p$Description, " from ", p$Source))
+}
+```
+
+The `product` service provides many useful details, including if a product is currently available in AppEEARS, a description, and information on the spatial and temporal resolution. Below, the product details are retrieved using 'ProductAndVersion'.
+
+```{r}
+# Convert the MCD15A3H.061 info to JSON object and print the prettified info
+prettify(toJSON(products$"MCD15A3H.061"))
+```
+
+Also, the products can be searched using their description. Below, search for products containing Leaf Area Index (LAI) in their description and make a list of their ProductAndVersion.
+
+```{r}
+# Create an empty list
+LAI_Products <- list()
+
+# Loop through the product list and save all LAI products to LAI_Products
+for (p in products){
+  if (grepl('Leaf Area Index', p$Description )){
+    LAI_Products <- append(LAI_Products, p$ProductAndVersion)
   }
 }
+
 LAI_Products
 ```
 
-Using the info above, Create a list of desired products.  
+Using the info above, create a list of desired products.  
 
 ```{r}
-desired_products <- c('MCD15A3H.006','MOD11A2.061')   # Create a vector of desired products 
+desired_products <- c('MCD15A3H.061','MOD11A2.061')
 desired_products
 ```
-***
-## 2b. Search and Explore Available Layers 
-This API call will list all of the layers available for a given product. Each product is referenced by its `ProductAndVersion` property which is also referred to as the product_id. First, request the layers for the `MCD15A3H.006` product.
+
+### 2b. Search and Explore Available Layers 
+
+This API call will list all of the layers available for a given product. Each product is referenced by its `ProductAndVersion` property which is also referred to as the product_id. First, request the layers for the `MCD15A3H.061` product.
+
 ```{r}
-# Request layers for the 1st product in the list: MCD15A3H.006
-MCD15A3H_req <- GET(paste0(API_URL,"product/", desired_products[1]))  # Request the info of a product from product URL
-MCD15A3H_content <- content(MCD15A3H_req)                             # Retrieve content of the request 
-MCD15A3H_response <- toJSON(MCD15A3H_content, auto_unbox = TRUE)      # Convert the content to JSON object
-remove(MCD15A3H_req, MCD15A3H_content)                                # Remove the variables that are not needed anymore
-#prettify(MCD15A3H_response)                                          # Print the prettified response
-names(fromJSON(MCD15A3H_response))                                    # print the layer's names    
+# Request layers for the 1st product in the list, i.e. MCD15A3H.061, from the product service
+layer_req <- GET(paste0(API_URL,"product/", desired_products[1]))
+
+# Retrieve content of the request and convert the content to JSON object
+MCD15A3H_response <- toJSON(content(layer_req), auto_unbox = TRUE)
 ```
-Next, request the layers for the `MOD11A2.061` product.
+
+The response will contain the layer names and attributes for the product.
+
 ```{r}
-MOD11_req <- GET(paste0(API_URL,"product/", desired_products[2]))  # Request the info of a product from product URL
-MOD11_content <- content(MOD11_req)                                # Retrieve content of the request
-MOD11_response <- toJSON(MOD11_content, auto_unbox = TRUE)         # Convert the content to JSON object
-remove(MOD11_req, MOD11_content)                                   # Remove the variables that are not needed anymore
-names(fromJSON(MOD11_response))                                    # print the layer names
+# Print the prettified response
+prettify(MCD15A3H_response)
 ```
-Lastly, select the desired layers and pertinent products and make a data frame using this information. This data frame will be inserted into the nested data frame that will be used to create a JSON object to submit a request in [Section 3](#section3).
+
+To submit a request, the layer names are needed. Below, extract the layer names from the response.
+
 ```{r}
-desired_layers <- c("LST_Day_1km","LST_Night_1km","Lai_500m")   # Create a vector of desired layers
-desired_prods <- c("MOD11A2.061","MOD11A2.061","MCD15A3H.006")  # Create a vector of products including the desired layers
-# Create a data frame including the desired data products and layers
-layers <- data.frame(product = desired_prods, layer = desired_layers) 
+names(fromJSON(MCD15A3H_response))
 ```
-***
-## 3. **[Submit a Point Request]{#section3}**
+
+Do the same for the `MOD11A2.061` product. Request the layers information and print the layer names.
+
+```{r}
+layer_req <- GET(paste0(API_URL,"product/", desired_products[2]))
+
+# Retrieve content of the request and convert the content to JSON object
+MOD11_response <- toJSON(content(layer_req), auto_unbox = TRUE)
+
+# Print the layer names
+names(fromJSON(MOD11_response))
+```
+
+Finally, select the desired layers and pertinent products and make a dataframe using this information. This dataframe will be used to construct a JSON object to submit a request in [Section 3](#section3).
+
+```{r}
+# Create a vector of products including the desired layers
+desired_prods <- c("MOD11A2.061", "MOD11A2.061", "MCD15A3H.061")
+
+# Create a vector of desired layers
+desired_layers <- c("LST_Day_1km", "LST_Night_1km", "Lai_500m")
+
+# Create a dataframe including the desired data products and layers
+layers <- data.frame(product = desired_prods, layer = desired_layers)
+```
+
+## 3. [Submit a Point Request]{#section3}
+
 The Submit task API call provides a way to submit a new request to be processed. It can accept data via JSON or query string. In the example below, create a JSON object and submit a request. Tasks in AppEEARS correspond to each request associated with your user account. Therefore, each of the calls to this service requires an authentication token (see [Section 1c.](#login)).
 
-***
-## 3a. Compile a JSON Object
-In this section, begin by setting up the information needed for a nested data frame that will be later converted to a JSON object for submitting an AppEEARS point request.
-For detailed information on required JSON parameters, see the [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#tasks).
+### 3a. Compile a JSON Object
+
+In this section, begin by setting up the information needed for a nested dataframe that will be later converted to a JSON object for submitting an AppEEARS point request. For detailed information on required JSON parameters, see the [API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#tasks).
 
 For point requests, beside the date range and desired layers information, the coordinates property must also be inside the task object. Optionally, set `id` and `category` properties to further identify your selected coordinates.
+
 ```{r}
-startDate <- "01-01-2018"       # Start of the date range for  which to extract data: MM-DD-YYYY
-endDate <- "12-31-2018"         # End of the date range for  which to extract data: MM-DD-YYYY
+# Start of the date range for which to extract data: MM-DD-YYYY
+startDate <- "01-01-2018"
+# End of the date range for which to extract data: MM-DD-YYYY
+endDate <- "12-31-2018"
 
 # If you are interested in submitting a request using a recurring time in a year, set the time variables as below:
 # startDate <- '05-01'                 # change start/end date to MM-DD
@@ -233,217 +287,301 @@ endDate <- "12-31-2018"         # End of the date range for  which to extract da
 # fromYear <- 2018
 # toYear <- 2020
 
-lat <- c(36.206228, 37.289327)        # Latitude of the point sites 
+lat <- c(36.206228, 37.289327)        # Latitude of the point sites
 lon <- c(-112.127134, -112.973760)    # Longitude of the point sites
+
 id <- c("0","1")                      # ID for the point sites
 category <- c("Grand Canyon", "Zion") # Category for point sites
 
 taskName <- 'NPS Vegetation'           # Enter name of the task, 'NPS Vegetation' used here
 taskType <- 'point'                    # Specify the task type, it can be either "area" or "point"
 ```
-To be able to successfully submit a task, the JSON object should be structured in a certain way. The code chunk below uses the information from the previous chunk to create a nested data frame. This nested data frame will be converted to JSON object that can be used to complete the request. 
+
+To be able to successfully submit a task, the JSON object should be structured in a certain way. The code chunk below uses the information from the previous chunk to create a nested dataframe. This nested dataframe will be converted to JSON object that can be used to complete the request. 
+
 ```{r}
-# Create a data frame including the date range for the request
+# Create a dataframe including the date range for the request
 date <- data.frame(startDate = startDate, endDate = endDate)
-# If you set the recurring to TRUE 
+
+# If you set the recurring to TRUE
 # date <- data.frame(startDate = startDate, endDate = endDate , recurring = recurring)
 # date$yearRange <- list(c(fromYear,toYear))
 
-# Create a data frame including lat and long coordinates. ID and category name is optional.
+# Create a dataframe including lat and long coordinates. ID and category name is optional.
 coordinates <- data.frame(id = id, longitude = lon, latitude = lat, category = category)
 
-task_info <- list(date,layers, coordinates)               # Create a list of data frames 
-names(task_info) <- c("dates", "layers", "coordinates")   # Assign names
+# Create a list of dataframes and assign names
+task_info <- list(date, layers, coordinates)
+names(task_info) <- c("dates", "layers", "coordinates")
 
-task <- list(task_info, taskName, taskType)               # Create a nested list 
-names(task) <- c("params", "task_name", "task_type")      # Assign names 
-remove(date, layers, coordinates, task_info)              # Remove the variables that are not needed anymore
+# Create a final list of dataframes and assign names
+task <- list(task_info, taskName, taskType)
+names(task) <- c("params", "task_name", "task_type")
 ```
-`toJSON` function from `jsonlite` package converts the type of data frame to a string that can be recognized as a JSON object to be submitted as a point request.  
+
+`toJSON` function from `jsonlite` package converts the type of dataframe to a string that can be recognized as a JSON object to be submitted as a point request.
+
 ```{r}
-task_json <- toJSON(task,auto_unbox = TRUE)   # Convert to JSON object
+task_json <- toJSON(task,auto_unbox = TRUE)
+prettify(task_json)
 ```
-***
-## 3b. Submit a Task Request
+
+### 3b. Submit a Task Request
 Token information is needed to submit a request. Below the login token is assigned to a variable.
+
 ```{r}
 token <- paste("Bearer", fromJSON(token_response)$token)     # Save login token to a variable
 ```
 
-Below, post a call to the API **task service**, using the `task_json` created above.
+Below, submit a POST request to the API **task service**, using the `task_json` created above.
+
 ```{r}
 # Post the point request to the API task service
-response <- POST(paste0(API_URL, "task"), 
-                 body = task_json , 
-                 encode = "json", 
-                 add_headers(Authorization = token, "Content-Type" = "application/json"))
+response <- httr::POST(
+  paste0(API_URL, "task"),
+  body = task_json,
+  encode = "json",
+  httr::add_headers(Authorization = token, "Content-Type" = "application/json"))
 
-task_content <- content(response)                                 # Retrieve content of the request 
-task_response <- prettify(toJSON(task_content, auto_unbox = TRUE))# Convert the content to JSON object
-remove(response, task_content)                                    # Remove the variables that are not needed anymore
-task_response                                                     # Print the prettified task response
+# Print the status code of the response
+httr::status_code(response)
 ```
-***
-## 3c. Retrieve Task Status
+
+```{r}
+# Retrieve content of the request and convert the content to JSON object
+task_response <- prettify(toJSON(content(response), auto_unbox = TRUE))
+
+# Print the prettified task response
+task_response
+```
+
+### 3c. Retrieve Task Status
+
 This API call will list all of the requests associated with your user account, automatically sorted by date descending with the most recent requests listed first.
 The AppEEARS API contains some helpful formatting resources. Below, limit the API response to 2 entries for the last 2 requests and set pretty to True to format the response as an organized JSON object to make it easier to read. Additional information on AppEEARS API
 [retrieve task](https://appeears.earthdatacloud.nasa.gov/api/?language=R#retrieve-task), [pagination](https://appeears.earthdatacloud.nasa.gov/api/?language=R#pagination), and [formatting](https://appeears.earthdatacloud.nasa.gov/api/?language=R#formatting) can be found in the API documentation.
 
 ```{r}
-params <- list(limit = 2, pretty = TRUE)                            # Set up query parameters
 # Request the task status of last 2 requests from task URL
-response_req <- GET(paste0(API_URL,"task"), query = params, add_headers(Authorization = token))
-response_content <- content(response_req)                           # Retrieve content of the request
-status_response <- toJSON(response_content, auto_unbox = TRUE)      # Convert the content to JSON object
-remove(response_req, response_content)                              # Remove the variables that are not needed anymore                         
-prettify(status_response)                                           # Print the prettified response
+response_req <- GET(
+  paste0(API_URL, "task"),
+  add_headers(Authorization = token))
+
+# Retrieve content of the request
+response_content <- content(response_req)
 ```
 
-The task_id that was generated when submitting your request can also be used to retrieve a task status. 
+The response above contains information for every request associated with your user account. Below, look at the first two requests, which should be the most recent two requests.  
+
 ```{r}
-task_id <- fromJSON(task_response)$task_id                 # Extract the task_id of submitted point request
+str(response_content[1:2], max.level = 3)
+```
+
+The task_id is needed to retrieve information or content for a specific request. Previously, the task_id was generated when submitting your request. This can be used to retrieve a status about the request.
+ 
+```{r}
+# Extract the task_id of submitted point request
+task_id <- fromJSON(task_response)$task_id
 # Request the task status of a task with the provided task_id from task URL
-status_req <- GET(paste0(API_URL,"task/", task_id), add_headers(Authorization = token)) 
-status_content <- content(status_req)                       # Retrieve content of the request       
-statusResponse <-toJSON(status_content, auto_unbox = TRUE)  # Convert the content to JSON object
-stat <- fromJSON(statusResponse)$status                     # Assign the task status to a variable  
-remove(status_req, status_content)                          # Remove the variables that are not needed anymore
-prettify(statusResponse)                                    # Print the prettified response
+status_req <- GET(
+  paste0(API_URL, "task/", task_id),
+  add_headers(Authorization = token))
+
+# Retrieve content of the request and convert the content to JSON object
+status_response <-toJSON(content(status_req), auto_unbox = TRUE)
+
+# Get the status of the task
+status <- fromJSON(status_response)$status
+
+# Print the status
+print(status)
 ```
 
 Retrieve the task status every 5 seconds. The task status should be `done` to be able to download the output.
+
 ```{r}
-while (stat != 'done') {
+while (status != 'done') {
   Sys.sleep(5)
   # Request the task status and retrieve content of request from task URL
-  stat_content <- content(GET(paste0(API_URL,"task/", task_id), add_headers(Authorization = token)))
-  stat <-fromJSON(toJSON(stat_content, auto_unbox = TRUE))$status    # Get the status
-  remove(stat_content) 
-  print(stat)
+  stat_content <- content(GET(
+    paste0(API_URL,"task/", task_id),
+    add_headers(Authorization = token)))
+  
+  status <-fromJSON(toJSON(stat_content, auto_unbox = TRUE))$status    # Get the status
+  remove(stat_content)
+  print(status)
 }
 ```
 
-***
-## 4. **Download a Request**
-## 4a. Explore Files in Request Output 
+## 4. Download a Request
+
+### 4a. Explore Files in Request Output 
+
 Before downloading the request output, examine the files contained in the request output.
+
 ```{r}
 # Request the task bundle info from API bundle URL
-response <- GET(paste0(API_URL, "bundle/", task_id), add_headers(Authorization = token))
-response_content <- content(response)                          # Retrieve content of the request
-bundle_response <- toJSON(response_content, auto_unbox = TRUE)  # Convert the content to JSON object
-prettify(bundle_response)                                       # Print the prettified response
-```
-***
-## 4b. Download Files in a Request (Automation) 
-The bundle API provides information about completed tasks. For any completed task, a bundle can be queried to return the files contained as a part of the task request. Below, call the bundle API and return all of the output files. Next, read the contents of the bundle in JSON format and loop through file_id to automate downloading all of the output files into the output directory. For more information, please see [AppEEARS API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#bundle).
-```{r, warning= FALSE, results= 'hide'}
-bundle <- fromJSON(bundle_response)$files
-for (id in bundle$file_id){
-  # retrieve the filename from the file_id
-  filename <- bundle[bundle$file_id == id,]$file_name   
-  # create a destination directory to store the file in
-  filepath <- paste(outDir,filename, sep = "/")
-  suppressWarnings(dir.create(dirname(filepath)))
-  # write the file to disk using the destination directory and file name 
-  response <- GET(paste0(API_URL, "bundle/", task_id, "/", id),
-                  write_disk(filepath, overwrite = TRUE),
-                  progress(),
-                  add_headers(Authorization = token))
-  }
+response <- GET(
+  paste0(API_URL, "bundle/", task_id),
+  add_headers(Authorization = token))
+
+# Retrieve content of the request convert the content to JSON object
+bundle_response <- toJSON(content(response), auto_unbox = TRUE)
+
+# Print the prettified bundle response
+prettify(bundle_response)
 ```
 
-***
-## 5. **Explore AppEEARS Quality Service**
+### 4b. Download Files in a Request (Automation)
+
+The bundle API provides information about completed tasks. For any completed task, a bundle can be queried to return the files contained as a part of the task request. Below, call the bundle API and return all of the output files. Next, read the contents of the bundle in JSON format and loop through file_id to automate downloading all of the output files into the output directory. For more information, please see [AppEEARS API Documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#bundle).
+
+```{r, warning= FALSE, results= 'hide'}
+bundle <- fromJSON(bundle_response)$files
+
+for (id in bundle$file_id){
+  # Retrieve the filename from the file_id
+  filename <- bundle[bundle$file_id == id,]$file_name
+
+  # Create a destination directory to store the file in
+  filepath <- paste(outDir, filename, sep = "/")
+  suppressWarnings(dir.create(dirname(filepath)))
+
+  # Write the file to disk using the destination directory and file name
+  response <- GET(
+    paste0(API_URL, "bundle/", task_id, "/", id),
+    write_disk(filepath, overwrite = TRUE),
+    progress(),
+    add_headers(Authorization = token))
+}
+```
+
+## 5. Explore AppEEARS Quality Service
+
 The quality API provides quality details about all of the data products available in AppEEARS. Below are examples of how to query the quality API for listing quality products, layers, and values. The final example ([Section 5c.](#decode)) demonstrates how AppEEARS quality services can be leveraged to decode pertinent quality values for your data. For more information visit [AppEEARS API documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#quality).
 
 First, reset pagination to include offset which allows you to set the number of results to skip before starting to return entries. Next, make a call to list all of the data product layers and the associated quality product and layer information.
 
 ```{r}
-params <- list(limit = 6, offset = 20, pretty = TRUE)     # Set up the query parameters
-q_req <- GET(paste0(API_URL, "quality"), query = params)  # Request the quality info from quality API_URL
-q_content <- content(q_req)                               # Retrieve the content of request
-q_response <- toJSON(q_content, auto_unbox = TRUE)        # Convert the info to JSON object
-remove(params, q_req, q_content)                          # Remove the variables that are not needed 
-prettify(q_response)                                      # Print the prettified quality information
+# Request the quality info from quality API_URL
+q_req <- GET(paste0(API_URL, "quality"))
+
+# Retrieve the content of request and convert the content to JSON object
+q_response <- toJSON(content(q_req), auto_unbox = TRUE)
+
+# Print the prettified quality information
+prettify(q_response)
 ```
-***
-## 5a. List Quality Layers 
+
+### 5a. List Quality Layers
+
 This API call will list all of the quality layer information for a product. For more information visit [AppEEARS API documentation](https://appeears.earthdatacloud.nasa.gov/api/?language=R#quality)
 
 ```{r}
-productAndVersion <- 'MCD15A3H.006'                            # Assign ProductAndVersion to a variable 
+# Assign ProductAndVersion to a variable
+productAndVersion <- 'MCD15A3H.061'
+
 # Request the quality info from quality API for a specific product
 MCD15A3H_req <- GET(paste0(API_URL, "quality/", productAndVersion))
-MCD15A3H_content <- content(MCD15A3H_req)                      # Retrieve the content of request
-MCD15A3H_quality <- toJSON(MCD15A3H_content, auto_unbox = TRUE)# Convert the info to JSON object
-remove(MCD15A3H_req, MCD15A3H_content)                         # Remove the variables that are not needed anymore
-prettify(MCD15A3H_quality)                                     # Print the prettified quality information
+
+# Retrieve the content of request and convert the content to JSON object
+MCD15A3H_quality <- toJSON(content(MCD15A3H_req), auto_unbox = TRUE)
+
+# Print the quality information
+prettify(MCD15A3H_quality)
 ```
-***
-## 5b. Show Quality Values 
-This API call will list all of the values for a given quality layer. 
+
+### 5b. Show Quality Values
+
+This API call will list all of the values for a given quality layer.
+
 ```{r}
-quality_layer <- 'FparLai_QC'                                 # assign a quality layer to a variable
+# Assign a quality layer to a variable
+quality_layer <- 'FparLai_QC'
+
 # Request the specified quality layer info from quality API
 quality_req <- GET(paste0(API_URL, "quality/",  productAndVersion, "/", quality_layer, sep = ""))
-quality_content <- content(quality_req)                        # Retrieve the content of request
-quality_response <- toJSON(quality_content, auto_unbox = TRUE) # Convert the info to JSON object
-remove(quality_req, quality_content)                           # Remove the variables that are not needed 
-prettify(quality_response)                                     # Print the quality response as a data frame
+
+# Retrieve the content of request and convert the content to JSON object
+quality_response <- toJSON(content(quality_req), auto_unbox = TRUE)
+
+# Print the quality response as a dataframe
+prettify(quality_response)
 ```
-***
-## 5c. [Decode Quality Values]{#decode}
+
+### 5c. [Decode Quality Values]{#decode}
+
 This API call will decode the bits for a given quality value. 
+
 ```{r}
-quality_value <- 1                        # Assign a quality value to a variable 
+quality_value <- 1
+
 # Request and retrieve information for provided quality value from quality API URL 
 response <- content(GET(paste0(API_URL, "quality/", productAndVersion, "/", quality_layer, "/", quality_value)))
-q_response <- toJSON(response, auto_unbox = TRUE)     # Convert the info to JSON object
-remove(response)                                      # Remove the variables that are not needed anymore
-prettify(q_response)                                  # Print the prettified response
+
+# Convert the content to JSON object
+q_response <- toJSON(response, auto_unbox = TRUE)
+
+# Print the response
+prettify(q_response)
 ```
-***
-## 6. **BONUS: Load Request Output and Visualize**
+
+## 6. **BONUS**: Load Request Output and Visualize
+
 Here, load the CSV file containing the results from your request using `readr` package, and create some basic visualizations using the `ggplot2` package.
 
-## 6a. Load a CSV
+### 6a. Load a CSV
+
 Use the `readr` package to load the CSV file containing the results from the AppEEARS request.
+
 ```{r, message= FALSE, warning= FALSE}
 # Make a list of csv files in the output directory
-files <- list.files(outDir, pattern = "\\MOD11A2-061-results.csv$") 
+files <- list.files(outDir, pattern = "\\MOD11A2-061-results.csv$")
+
 # Read the MOD11A2 results
 df <- read_csv(paste0(outDir,"/", files), show_col_types = FALSE)
 ```
+
 Select the MOD11A2.061 LST Day column for the data from Grand Canyon National Park using `dplyr` package.
+
 ```{r}
 lst_GC <- df %>%
   # Filter df for the point from GC
   filter(Category == "Grand Canyon") %>%  
   # Select desired columns
-  select(Latitude, Longitude, Date ,MOD11A2_061_LST_Day_1km, MOD11A2_061_LST_Night_1km) 
+  select(Latitude, Longitude, Date ,MOD11A2_061_LST_Day_1km, MOD11A2_061_LST_Night_1km)
 ```
+
 Extract information for LST_DAY_1KM from MOD11_response of product service call from earlier in the tutorial.
-```{r}
-#fromJSON(MOD11_response)$LST_Day_1km                        # Extract all the info for LST_Day_1km layer
 
-fillValue <- fromJSON(MOD11_response)$LST_Day_1km$FillValue  # Assign fill value to a variable
-unit <- fromJSON(MOD11_response)$LST_Day_1km$Units           # Assign unit to a variable
-sprintf("Fill value for LST_DAY_1KM is: %i" ,fillValue)      # Print LST_DAY_1KM fill value
-sprintf("Unit for LST_DAY_1KM is: %s" ,unit)                 # Print LST_DAY_1KM unit 
+```{r}
+# Extract all of the data layer info for LST_Day_1km
+#fromJSON(MOD11_response)$LST_Day_1km
+
+# Assign fill value and units to a variable
+fill_value <- fromJSON(MOD11_response)$LST_Day_1km$FillValue
+unit <- fromJSON(MOD11_response)$LST_Day_1km$Units
+
+# Print the fill value and unit
+sprintf("Fill value for LST_DAY_1KM is: %i", fill_value)
+sprintf("Unit for LST_DAY_1KM is: %s", unit)
 
 ```
-***
-## 6b. Plot Results (Line/Scatter Plots)
+
+### 6b. Plot Results (Line/Scatter Plots)
+
 Next, plot a time series of daytime LST for the selected point in Grand Canyon National Park for 2018. Below, filter the LST data to exclude fill values. 
+
 ```{r}
 lst_GC <- lst_GC %>%
   # exclude NoData
-  filter(MOD11A2_061_LST_Day_1km != fillValue)%>%
-  filter(MOD11A2_061_LST_Night_1km != fillValue)
+  filter(MOD11A2_061_LST_Day_1km != fill_value) %>%
+  filter(MOD11A2_061_LST_Night_1km != fill_value)
 
 ```
+
 Next, plot LST Day as a time series with some additional formatting using `ggplot2`.
+
 ```{r, fig.width = 12, fig.height=5}
 ggplot(lst_GC)+
   geom_line(aes(x= Date, y = MOD11A2_061_LST_Day_1km), size=1, color="blue")+
@@ -462,9 +600,12 @@ ggplot(lst_GC)+
 ```
 
 Using the `tidyr` package, the LST Day and Night values for Grand Canyon NP are being gathered in a single column to be used to make a plot including both  `LST_Day_1km` and `LST_Night_1km`.
+
 ```{r}
 lst_GC_DN <- tidyr::gather(lst_GC, key = Tstat , value = LST, MOD11A2_061_LST_Day_1km, MOD11A2_061_LST_Night_1km)
-lst_GC_DN[1:5,]                     # print the five first observations 
+
+# Print the first rows of the dataframe
+head(lst_GC_DN)
 ```
 
 Next, plot LST Day and Night as a time series with some additional formatting.
@@ -492,39 +633,43 @@ ggplot(lst_GC_DN)+
 
 Finally, bring in the daytime LST data from Zion National Park, and compare with daytime LST at Grand Canyon National Park, shown below in a scatterplot using `ggplot2` package. 
 Here, the `dplyr` is used to extract the LST_DAY_1km for Zion National Park.  
+
 ```{r}
 lst_Z <- df %>%
-  filter(MOD11A2_061_LST_Day_1km != fillValue) %>%        # Filter fill value 
-  filter(Category == "Zion")%>%                           # Filter Zion national park
-  select(Date, MOD11A2_061_LST_Day_1km)                   # Select desired columns
+  # Filter fill value
+  filter(MOD11A2_061_LST_Day_1km != fill_value) %>%
+  # Filter Zion national park
+  filter(Category == "Zion") %>%
+  # Select desired columns
+  select(Date, MOD11A2_061_LST_Day_1km)
 ```
+
 Make a scatterplot.
+
 ```{r}
-ggplot()+
-  geom_point(aes(x=lst_Z$MOD11A2_061_LST_Day_1km, y=lst_GC$MOD11A2_061_LST_Day_1km), shape=18 , size = 3, color="blue")+
+ggplot() +
+  geom_point(aes(x=lst_Z$MOD11A2_061_LST_Day_1km, y=lst_GC$MOD11A2_061_LST_Day_1km), shape=18 , size = 3, color="blue") +
   labs(title = "MODIS LST: Grand Canyon vs. Zion National Park, 2018",
        x = sprintf("Zion: LST_Day_1km (%s)",unit),
-       y = sprintf( "Grand Canyon: LST_Day_1km (%s)",unit))+
+       y = sprintf( "Grand Canyon: LST_Day_1km (%s)",unit)) +
   theme(plot.title = element_text(face = "bold",size = rel(1.5), hjust = 0.5),
         axis.title = element_text(face = "bold",size = rel(1)),
         panel.background = element_rect(fill = "lightgray", colour = "black"),
         axis.text.x = element_text(face ="bold",color="black", size = 10),
         axis.text.y = element_text(face ="bold",color="black", size = 10)
-        )
+   )
 ```
 
 This example can provide a template to use for your own research workflows. Leveraging the AppEEARS API for searching, extracting, and formatting analysis ready data, and loading it directly into R means that you can keep your entire research workflow in a single software program, from start to finish.
 
 ***
+
 ## Contact Information  
- Material written by Mahsa Jami^1^ and Cole Krehbiel^1^                                                     
+ LP DAAC ^1^
  Contact: LPDAAC@usgs.gov   
  Voice: +1-866-573-3222   
  Organization: Land Processes Distributed Active Archive Center (LP DAAC)  
  Website: https://lpdaac.usgs.gov/  
- Date last modified: 05-06-2023      
+ Date last modified: 11-05-2024      
  
- ^1^ KBR, Inc., contractor to the U.S. Geological Survey, Earth Resources Observation and Science (EROS) Center,  
- Sioux Falls, South Dakota, USA. Work performed under USGS contract G15PD00467 for LP DAAC^2^.  
- 
- ^2^ LP DAAC Work performed under NASA contract NNG14HH33I.
+ ^1^ Work performed under USGS contract 140G0121D0001 for NASA contract NNG14HH33I.
