@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 _________________________________________________________________________
+## 2025-04-30
+> ### Added
+> Added Quality Service Guide
+> Added AppEEARS markdown guide
+> ### Updated
+> Updated Readme
+
+
+
 ## 2024-11-05
 > ### Updated
 >
