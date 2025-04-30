@@ -7,7 +7,7 @@ The Application for Extracting and Exploring Analysis Ready Samples ([AppEEARS](
 ### Step 1. Sign in 
 
 Sign in using your Earthdata login credentials. If you do not have an Earthdata account, please see the [Workshop Prerequisites](https://nasa-openscapes.github.io/2022-Fall-ECOSTRESS-Cloud-Workshop/prerequisites/) for guidance.  
-![*Figure caption: AppEEARS Sign In*](https://github.com/nasa/AppEEARS-Data-Resources/tree/main/images/AppEEARS_signIn.png)
+![*Figure caption: AppEEARS Sign In*](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/images/AppEEARS_signIn.png).
 
 ### Step 2. Extract the Sample 
 
@@ -20,22 +20,22 @@ In this example we are interested in the [ECOSTRESS LSTE](https://doi.org/10.506
 5. For area sample, you can select your **output file format**. You also have an option to **reproject** all your layers to another coordinate reference system.   
 6. Now you can **submit**.   
 
-![*Figure caption: Extract area and point sample for ECOSTRESS data available in AWS cloud in AppEEARS*](../img/AppEEARS_point&area.png) 
+![*Figure caption: Extract area and point sample for ECOSTRESS data available in AWS cloud in AppEEARS*](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/images/AppEEARS_point_area.png) 
 
 Once your request is complete, you can **View** and **Download** your results from the Explore Requets page. 
 
-![*Figure caption: Refine search*](https://github.com/nasa/AppEEARS-Data-Resources/tree/main/images/AppEEARS_Explore.png)
+![*Figure caption: Refine search*](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/images/AppEEARS_Explore.png)
 
 ### Step 3. Explore the outputs
 From the Explore Requests page, click the View icon in order to view and interact with your results. This will take you to the View Area Sample page.
-![*Figure caption: View Sample Results*](https://github.com/nasa/AppEEARS-Data-Resources/tree/main/images/AppEEARS_viewSample.png)
+![*Figure caption: View Sample Results*](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/images/AppEEARS_viewSample.png)
 
 
 ### Step 4. Download the outputs  
 
 Finally navigate to Download Sample page by clicking the Download icon on the Explore Requests page or from View Sample pag to download your results. Besides your actual outputs, you will have access to supporting files including a text file with URLs to source data, JSON file you can use to recreate the same sample, decoded quality information, and CSV file with the layer statistics.
 
-![*Figure caption: Download Sample Results*](https://github.com/nasa/AppEEARS-Data-Resources/tree/main/images/AppEEARS_downloadSample.png)
+![*Figure caption: Download Sample Results*](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/images/AppEEARS_downloadSample.png)
 
 
 Check out AppEEARS [help documentation](https://appeears.earthdatacloud.nasa.gov/help) for more details. If you wish to access AppEEARS programatically checkout [AppEEARS API documenation](https://appeears.earthdatacloud.nasa.gov/api/). 
