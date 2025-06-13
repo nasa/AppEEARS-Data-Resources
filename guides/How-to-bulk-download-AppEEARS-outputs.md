@@ -28,7 +28,7 @@ The return should look like:
 
 where the value contained in `"token"` is your `Bearer Token` (e.g., r0HkNQtYquKjkOZbY-6P8mgjA8....)
 
-> **Bearer tokens generated via the [Earthdata Login (EDL) user profile](https://urs.earthdata.nasa.gov/users/mahsajami/user_tokens) are not compatible with the AppEEARS application. To access AppEEARS, users must authenticate and generate a bearer token through the [AppEEARS login service](https://appeears.earthdatacloud.nasa.gov/api/#login) instead.**
+> **Bearer tokens generated via the [Earthdata Login (EDL) user profile](https://urs.earthdata.nasa.gov/users/) are not compatible with the AppEEARS application. To access AppEEARS, users must authenticate and generate a bearer token through the [AppEEARS login service](https://appeears.earthdatacloud.nasa.gov/api/#login) instead.**
 
 
 ## Step 4  
