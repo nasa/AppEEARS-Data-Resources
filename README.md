@@ -52,6 +52,7 @@ Content in this repository is divided into Python and R resources including tuto
 ## Helpful Links    
 
 + [AppEEARS Website](https://appeears.earthdatacloud.nasa.gov/)
++ [AppEEARS QGIS Plugin](https://github.com/nasa/AppEEARS-QGIS-Plugin)
 + [Available Products in AppEEARS](https://appeears.earthdatacloud.nasa.gov/products)
 + [AppEEARS Documentation](https://appeears.earthdatacloud.nasa.gov/help)
 + [AppEEARS API Documentation](https://appeears.earthdatacloud.nasa.gov/api/)
