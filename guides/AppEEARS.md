@@ -40,4 +40,4 @@ Finally navigate to Download Sample page by clicking the Download icon on the Ex
 
 Check out AppEEARS [help documentation](https://appeears.earthdatacloud.nasa.gov/help) for more details. If you wish to access AppEEARS programatically checkout [AppEEARS API documenation](https://appeears.earthdatacloud.nasa.gov/api/). 
 
-C:\Users\mjami\Repository\AppEEARS-Data-Resources\guides\AppEEARS.md
+
