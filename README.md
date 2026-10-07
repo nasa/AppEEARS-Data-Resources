@@ -39,6 +39,7 @@ Content in this repository is divided into Python and R resources including tuto
 
 | Repository Contents | Type | Summary | 
 |----|-----|----|
+| **[Streaming_AppEEARS_Area_Outputs.ipynb](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/Python/tutorials/Streaming_AppEEARS_Area_Outputs.ipynb)** | Jupyter Notebook | Demonstrates how to submit AppEEARS area requests and stream the resulting NetCDF outputs directly over HTTPS using Python for analysis 
 | **[COG_AppEEARS_S3_Direct_Access.ipynb](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/Python/tutorials/COG_AppEEARS_S3_Direct_Access.ipynb)** | Jupyter Notebook | Demonstrates how to use AppEEARS Cloud Optimized GEOTIFF (COG) outputs using Python 
 | **[Point_Sample_AppEEARS_S3_Direct_Access.ipynb](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/Python/tutorials/Point_Sample_AppEEARS_S3_Direct_Access.ipynb)** | Jupyter Notebook | Demonstrates how to access AppEEARS point sample Comma-Separated Values (CSV) outputs using Python 
 | **[AppEEARS_API_Area.ipynb](https://github.com/nasa/AppEEARS-Data-Resources/blob/main/Python/tutorials/AppEEARS_API_Area.ipynb)** | Jupyter Notebook | Demonstrates how to use Python to connect to the AppEEARS API to submit and downlaod an area sample  
